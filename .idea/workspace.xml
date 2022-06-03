@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f0eae4f8-0f00-4b3d-882d-2966238b9034" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/approach/ar_models_cs.py" beforeDir="false" afterPath="$PROJECT_DIR$/approach/ar_models_cs.py" afterDir="false" />
-    </list>
+    <list default="true" id="f0eae4f8-0f00-4b3d-882d-2966238b9034" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -36,7 +34,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1654273801571</updated>
-      <workItem from="1654273803560" duration="1638000" />
+      <workItem from="1654273803560" duration="2358000" />
     </task>
     <servers />
   </component>
