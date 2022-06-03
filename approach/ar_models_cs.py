@@ -10,7 +10,7 @@ from joblib import Parallel, delayed
 #import projection as pjt
 from analysis import projection as pjt
 
-from approach import OU_process as ou
+# from approach import OU_process as ou
 from sklearn.preprocessing import MinMaxScaler
 import warnings
 from statsmodels.tsa.stattools import adfuller
@@ -242,6 +242,7 @@ class Models:
         measure_pd.columns = col_names
         self.measures = measure_pd
 
+        import ipdb;ipdb.set_trace()
         coeffs = dict_reorder(coeffs)
         self.coeffs = np.array([coeffs[item] for item in coeffs.keys()])
         self.coeffs[np.isnan(self.coeffs)] = 0
@@ -263,58 +264,45 @@ class Models:
             return(signal)
 
 
-    def _var_func(self, i, measure_pd, coeffs):
-        """
-        It computes VAR model for one trajectory.
-        """
-        coeffs_i = np.array([])
+        def _var_func(self, i, measure_pd, coeffs):
+            """
+            It computes VAR model for one trajectory.
+            """
+            coeffs_i = np.array([])
+
+            # import ipdb;ipdb.set_trace()
+            measure_list = [self.dataset_norm[self._ids[i]]['mmsi'][0]]
+            if self.verbose:
+                print(f"VAR Computing {i} of {len(self._ids)}")
 
 
-        measure_list = [self.dataset_norm[self._ids[i]]['mmsi'][0]]
-        if self.verbose:
-            print(f"VAR Computing {i} of {len(self._ids)}")
+            dff = pd.DataFrame.from_dict(self.dataset_norm[self._ids[i]])
 
 
-        dff = pd.DataFrame.from_dict(self.dataset_norm[self._ids[i]])
-       
-###################################################
-        df_columns = [ 'lat', 'lon', 'sog', 'cog'];dflist = []
-        for dc in df_columns:
-            series = dff.loc[:,dc]
-            dframe = pd.DataFrame(series)
-            statres = adfuller(dframe.values)
-            if statres[1]>=0.05:
-                print(f'{dc} is not stationary')
-                stat_df = dframe.diff().dropna()
-            else:
-                print(f'{dc} is stationary')
-                stat_df = dframe
-            dflist.append(stat_df)
-        min_len = np.min([len(d) for d in dflist])
-        dflist2 = [dl[0:min_len] for dl in dflist]
-        [dl.reset_index(drop=True, inplace=True) for dl in dflist2]
-        dff_stat = pd.concat(dflist2,axis=1)
+            df_features = dff.loc[:, ['lat', 'lon', 'sog', 'cog']]
+
+            print(f'df_feat for feat{i}')
+
+            model_var = VAR(df_features)
+            res = model_var.fit(2)
 
 
-        df_features = dff_stat
-        model_var = VAR(df_features)
-        model_var.select_order(15)
-        res = model_var.fit(maxlags=15, ic='aic')
-        # irf = results.irf(10)
+            rp = res.params
+            coef1 = rp.loc[:, "lon"].values
+            coeffs_i = np.hstack((coeffs_i, coef1))
 
-        print('var res')
+            coef2 = rp.loc[:, "lat"].values
+            coeffs_i = np.hstack((coeffs_i, coef2))
 
-        rp = res.params
-        for dc in df_columns:
-            coef = rp.loc[:, dc].values
-            coeffs_i = np.hstack((coeffs_i,coef))
+            print('coef shapes', coef1.shape, coef2.shape)
 
-        
-        measure_list = measure_list + [res.aic, res.bic, res.fpe, res.hqic]
+            measure_list = measure_list + [res.aic, res.bic, res.fpe, res.hqic]
 
-        measure_pd[i] = measure_list
-        coeffs[i] = coeffs_i
-    def create_data_dict(self):
+            measure_pd[i] = measure_list
+            coeffs[i] = coeffs_i
+
+
+def create_data_dict(self):
         """
         Dictionary of models options.
         """
