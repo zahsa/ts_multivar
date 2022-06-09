@@ -25,12 +25,12 @@ def normalize(x, dim_set, verbose=True):
     avg = x[dim_set].mean(axis=0)
     std = x[dim_set].std(axis=0)
     # maxv = x[dim_set].max(axis=0)
-    x['lat'] = x['lat'] / 90
-    x['lon'] = x['lon'] / 180
+    x['lat_norm'] = x['lat'] / 90
+    x['lon_norm'] = x['lon'] / 180
 
     for dim in dim_set:
         if (dim != 'lat') and (dim != 'lon'):
-            x[dim] = (x[dim] - avg[dim]) / std[dim]
+            x[f'{dim}_norm'] = (x[dim] - avg[dim]) / std[dim]
 
     return x
 
@@ -62,8 +62,8 @@ def removing_invalid_samples(x, min_obs=None, subset=None):
     :return: the dataset with country attribute
     """
     # round values to 4 decimals (10 meters)
-    x.lat = x.lat.round(4)
-    x.lon = x.lon.round(4)
+    # x.lat = x.lat.round(4)
+    # x.lon = x.lon.round(4)
 
     # remove duplicate entries
     x = x.drop_duplicates(subset=subset, keep='first')
@@ -171,7 +171,7 @@ class Trajectories:
         if 'region' in args.keys():
             self.region = args['region']
 
-        self.threshold = 1e-3
+        self.threshold = 1e-5
         if 'threshold' in args.keys():
             self.threshold = args['threshold']
 
@@ -208,7 +208,6 @@ class Trajectories:
             print(f'Preprocessed trips data save at: {self.preprocessed_path}')
         else:
             print('path3 exists')
-
 
     def cleaning(self):
         """
@@ -247,17 +246,16 @@ class Trajectories:
 
         # select mmsi randomly
         ids = dataset['mmsi'].unique()
-        if self._nsamples is not None:
-            random.shuffle(ids)
-            ids = ids[0:self._nsamples]
-            dataset = dataset[dataset['mmsi'].isin(ids)]
+        # if self._nsamples is not None:
+        #     random.shuffle(ids)
+        #     ids = ids[0:self._nsamples]
+        #     dataset = dataset[dataset['mmsi'].isin(ids)]
 
         dataset = normalize(dataset, ['lat', 'lon'])
 
         new_dataset = pd.DataFrame()
         # create trajectories
         count_mmsi = 0
-        count_traj = 0
         for id in ids:
             print(f'\t Cleaning trajectory {count_mmsi} of {len(ids)}')
             trajectory = dataset[dataset['mmsi'] == id] #z: collecting all rows with the same id, gives us a trajectory of one vessel
@@ -272,7 +270,7 @@ class Trajectories:
             # if is inside the selected region and contains enough observations
             if (trajectory.shape[0] >= self.min_obs) and isin_region:
                 # include sub trajectory id and total time
-                aux_col = pd.DataFrame({'trajectory': np.repeat(count_traj, trajectory.shape[0])})
+                aux_col = pd.DataFrame({'trajectory': np.repeat(count_mmsi, trajectory.shape[0])})
                 trajectory.reset_index(drop=True, inplace=True)
                 trajectory = pd.concat([aux_col, trajectory], axis=1)
 
@@ -287,14 +285,13 @@ class Trajectories:
 
                 # add trajectory
                 # remove trajectories with constant values
-                if np.var(trajectory.lat) > self.threshold and np.var(trajectory.lon) > self.threshold:
+                if np.var(trajectory.lat_norm) > self.threshold and np.var(trajectory.lon_norm) > self.threshold:
                     new_dataset = pd.concat([new_dataset, trajectory], axis=0, ignore_index=True)
-                    count_traj = count_traj + 1
-                    count_mmsi = count_mmsi + 1 #z?????
+                    count_mmsi = count_mmsi + 1
 
                 else:
                     print(f'\t\ttrajectory {id} is removed')
-            count_mmsi = count_mmsi + 1 #z if one trajectory is removed then the whole information for one vessel is deleted
+            # count_mmsi = count_mmsi + 1 #z if one trajectory is removed then the whole information for one vessel is deleted
          
         self._nsamples = count_mmsi
         print(f'{count_mmsi} remaining')

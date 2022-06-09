@@ -217,8 +217,8 @@ class Clustering:
                 print('Saving in csv file')
             self._agg_cluster_labels()
 
-        # print('Computing statistics...')
-        # st.file_statistics(self.results_file_path, self.path)
+        print('Computing statistics...')
+        st.file_statistics(self.results_file_path, self.path)
 
     def silhouette(self):
         """

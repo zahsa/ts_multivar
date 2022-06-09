@@ -155,7 +155,7 @@ class Models:
 
         dff = pd.DataFrame.from_dict(self.dataset[self._ids[i]])
 
-        df_features = dff.loc[:, ['lat', 'lon', 'sog', 'cog']]
+        df_features = dff.loc[:, ['lat_norm', 'lon_norm']] #, 'sog', 'cog']]
 
         print(f'df_feat for feat{i}')
 
@@ -163,10 +163,10 @@ class Models:
         res = model_var.fit(2)
 
         rp = res.params
-        coef1 = rp.loc[:, "lon"].values
+        coef1 = rp.loc[:, "lon_norm"].values
         coeffs_i = np.hstack((coeffs_i, coef1))
 
-        coef2 = rp.loc[:, "lat"].values
+        coef2 = rp.loc[:, "lat_norm"].values
         coeffs_i = np.hstack((coeffs_i, coef2))
 
         print('coef shapes', coef1.shape, coef2.shape)
