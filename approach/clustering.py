@@ -22,7 +22,7 @@ def my_DBSCAN(data, **args):
     if 'eps' in args.keys():
         eps = args['eps']
 
-    clustering = DBSCAN(eps=eps, min_samples=min_samples, metric='precomputed')
+    clustering = DBSCAN(eps=eps, min_samples=min_samples)
     clustering.fit(data)
 
     return clustering
@@ -48,7 +48,7 @@ def my_hierarchical(data, **args):
         k = None
 
     data[np.isnan(data)] = 0
-    clustering = AgglomerativeClustering(n_clusters=k, linkage=linkage, affinity='precomputed', distance_threshold=thr)
+    clustering = AgglomerativeClustering(n_clusters=k, linkage=linkage, distance_threshold=thr)
     clustering.fit(data)
 
     return clustering
@@ -75,7 +75,7 @@ def my_spectral(data, **args):
     # convert distance to similarity
     data = 1 - data
     # data = np.exp(- data ** 2 / (2. * delta ** 2))
-    clustering = SpectralClustering(n_clusters=k, n_components=n_eigenvectors, assign_labels="kmeans", affinity='precomputed', random_state=42, n_init=1)
+    clustering = SpectralClustering(n_clusters=k, n_components=n_eigenvectors, assign_labels="kmeans", random_state=42, n_init=1)
     clustering.fit(data)
 
     return clustering
@@ -133,7 +133,7 @@ class Clustering:
     """
     It reads the distance matrix and execute the clustering algortihm.
     """
-    def __init__(self, ais_data_path, distance_matrix_path, verbose=True, **args):
+    def __init__(self, ais_data_path, dm, verbose=True, **args):
         """
         It receives the preprocessed DCAIS dataset in dict format.
         It applies the selected model on the trajectories and compute the euclidean distance.
@@ -144,7 +144,7 @@ class Clustering:
         self._alg_dict = create_algorithms_dict()
         self.ais_data_path = ais_data_path
         self._verbose = verbose
-        self.dm = abs(pickle.load(open(distance_matrix_path, 'rb')))
+        self.dm = dm
         self._model = None
         self.labels = None
         self.SC = None
@@ -206,11 +206,10 @@ class Clustering:
             if self.cluster_algorithm != 'dbscan':
                 self._estimate_number_clusters()
 
-        self._model = self._alg_dict[self.cluster_algorithm](self.dm, metric='precomputed', eps=self.eps,
+        self._model = self._alg_dict[self.cluster_algorithm](self.dm, eps=self.eps,
                                                              k=self._k,
                                                              linkage=self._linkage, min_samples=self._min_samples)
         print('error in clustering labels')
-        import ipdb;ipdb.set_trace()
         self.labels = self._model.labels_
         self.silhouette()
         if self.path is not None:
@@ -226,8 +225,8 @@ class Clustering:
         It computes the silhouette measure.
         """
         if len(np.unique(self.labels)) > 1:
-            self.SC_sample = metrics.silhouette_samples(self.dm, labels=self.labels, metric='precomputed')
-            self.SC = metrics.silhouette_score(self.dm, labels=self.labels, metric='precomputed')
+            self.SC_sample = metrics.silhouette_samples(self.dm, labels=self.labels)
+            self.SC = metrics.silhouette_score(self.dm, labels=self.labels)
         else:
             self.SC_sample = np.zeros(self.dm.shape[0])
             self.SC = 0
@@ -309,7 +308,6 @@ class Clustering:
         """
         data = pd.read_csv(self.ais_data_path)
         print('label error')
-        import ipdb;ipdb.set_trace()
         labels = pd.DataFrame([self.labels], columns=data['trajectory'].unique()).to_dict('records')[0]
         aux = data['trajectory']
         aux = aux.map(labels)
