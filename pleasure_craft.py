@@ -64,7 +64,7 @@ if not os.path.exists(cl_path_ou_spectral):
     result_ou_3 = result_ou_3.labels
 else:
     print('SC 5 exist')
-    result_ou_2 = pd.read_csv(cl_path_ou_hc)['Clusters']
+    result_ou_3 = pd.read_csv(cl_path_ou_spectral)['Clusters']
 
 ### Runing clustering ARIMA
 print('Clustering ARIMA...')
@@ -76,7 +76,7 @@ if not os.path.exists(cl_path_arima_hc):
     result_arima_2 = result_arima_2.labels
 else:
     print('SC 5 exist')
-    result_arima_2 = pd.read_csv(cl_path_ou_hc)['Clusters']
+    result_arima_2 = pd.read_csv(cl_path_arima_hc)['Clusters']
 
 cl_path_arima_spectral = './results/DCAIS_example/ARIMA/spectral/spectral_5.csv'
 if not os.path.exists(cl_path_arima_spectral):
@@ -84,7 +84,7 @@ if not os.path.exists(cl_path_arima_spectral):
     result_arima_3 = result_arima_3.labels
 else:
     print('SC 5 exist')
-    result_arima_3 = pd.read_csv(cl_path_ou_hc)['Clusters']
+    result_arima_3 = pd.read_csv(cl_path_arima_spectral)['Clusters']
 
 ### Runing clustering
 print('Clustering VAR...')
@@ -96,7 +96,7 @@ if not os.path.exists(cl_path_var_hc):
     result_2 = result_2.labels
 else:
     print('SC 5 exist')
-    result_2 = pd.read_csv(cl_path_ou_hc)['Clusters']
+    result_2 = pd.read_csv(cl_path_var_hc)['Clusters']
 
 cl_path_var_spectral = './results/DCAIS_example/spectral/spectral_5.csv'
 if not os.path.exists(cl_path_var_spectral):
