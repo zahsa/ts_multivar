@@ -5,12 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f0eae4f8-0f00-4b3d-882d-2966238b9034" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/approach/OU_process.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/approach/ar_models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pleasure_craft.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis/statistics.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/statistics.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main_var.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_var.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pleasure_craft.py" beforeDir="false" afterPath="$PROJECT_DIR$/pleasure_craft.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -131,7 +127,7 @@
       <workItem from="1657803721849" duration="4416000" />
       <workItem from="1658239290807" duration="1661000" />
       <workItem from="1658342102171" duration="2105000" />
-      <workItem from="1658492471422" duration="4400000" />
+      <workItem from="1658492471422" duration="8803000" />
     </task>
     <task id="LOCAL-00001" summary="including normalization into preprocessing and clustering">
       <created>1654625546633</created>
@@ -147,7 +143,14 @@
       <option name="project" value="LOCAL" />
       <updated>1654800633275</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="pleasure craft + NMI + univariate">
+      <created>1658502669140</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1658502669140</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -168,7 +171,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="including normalization into preprocessing and clustering" />
     <MESSAGE value="fixing normalization and cleaning" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixing normalization and cleaning" />
+    <MESSAGE value="pleasure craft + NMI + univariate" />
+    <option name="LAST_COMMIT_MESSAGE" value="pleasure craft + NMI + univariate" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
