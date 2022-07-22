@@ -24,6 +24,8 @@ dataset_dict = dataset.pandas_to_dict()
 features = Models(dataset=dataset_dict, features_opt='var', dim_set=dim_set, folder='./results/DCAIS_example/')
 
 ### Runing clustering
-result = Clustering(ais_data_path=dataset.preprocessed_path, dm=features.coeffs, cluster_algorithm='hierarchical', linkage='average', folder=f'./results/DCAIS_example/', norm_dist=False)
+result_1 = Clustering(ais_data_path=dataset.preprocessed_path, dm=features.coeffs, cluster_algorithm='dbscan', folder=f'./results/DCAIS_example/', norm_dist=False)
+result_2 = Clustering(ais_data_path=dataset.preprocessed_path, dm=features.coeffs, cluster_algorithm='hierarchical', linkage='average', folder=f'./results/DCAIS_example/', norm_dist=False)
+result_3 = Clustering(ais_data_path=dataset.preprocessed_path, dm=features.coeffs, cluster_algorithm='spectral', folder=f'./results/DCAIS_example/', norm_dist=False)
 
 

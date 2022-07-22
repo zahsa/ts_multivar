@@ -96,11 +96,12 @@ def statistics(dataset, col='trajectory', folder='./results_data/'):
     for i in vt_trajectory:
         sample = dataset[dataset[col] == i]
         row = [i, sample['mmsi'].iloc[0], sample['Clusters'].iloc[0], sample.shape[0],
-               len(np.unique(sample['vessel_type'])), np.unique(sample['vessel_type']), len(np.unique(sample['flag'])), np.unique(sample['flag']),
+               len(np.unique(sample['vessel_type'])), np.unique(sample['vessel_type']),
+               #len(np.unique(sample['flag'])), np.unique(sample['flag']),
                sample['silhouette'].iloc[0], sample['threshold_std'].iloc[0], sample['scores-3std'].iloc[0],
                sample['lat'].mean(), sample['lat'].std(), sample['lon'].mean(), sample['lon'].std()]
         row = pd.DataFrame([row], columns=[col, 'mmsi', 'cluster', 'n_observations', 'n_vessel_type','vessel_type',
-                                            'n_flags', 'flags',
+                                            #'n_flags', 'flags',
                                            'silhouette', 'threshold', 'scores',
                                            'lat_avg', 'lat_std', 'lon_avg', 'lon_std'])
         id_statistcs = pd.concat([id_statistcs, row], ignore_index=True)
@@ -130,11 +131,12 @@ def statistics_clusters(dataset, col='Clusters', folder='./results_data/'):
         sample_trajectory = trajectory_df[trajectory_df[col] == i]
         row = [i, sample['Cl_Silhouette'].unique()[0], sample_trajectory['silhouette'].mean(), sample['silhouette'].std(), sample['threshold_std'].iloc[0], (sample_trajectory['scores-3std'] == 1).sum(), (sample_trajectory['scores-3std'] == -1).sum(),
                sample['lat'].mean(), sample['lat'].std(), sample['lon'].mean(), sample['lon'].std(), len(sample_trajectory), len(sample['mmsi'].unique()),
-               len(np.unique(sample['vessel_type'])), np.unique(sample['vessel_type']),
-               len(sample['flag'].unique()), list(np.unique(sample['flag']))]
+               len(np.unique(sample['vessel_type'])), np.unique(sample['vessel_type'])]
+               #len(sample['flag'].unique()), list(np.unique(sample['flag']))]
         row = pd.DataFrame([row], columns=[col, 'cl_silhouette', 'sc_mean', 'sc_std', 'threshold_std', 'non-outliers', 'outliers',
                                            'lat_avg', 'lat_std', 'lon_avg', 'lon_std', 'n_trajectory', 'n_mmsi', 'n_vessel_types',
-                                           'vessel_types', 'n_flags', 'flags'])
+                                           'vessel_types'])
+                                            #, 'n_flags', 'flags'])
         id_statistcs = pd.concat([id_statistcs, row], ignore_index=True)
 
     id_statistcs.to_csv(f'{folder}/statistcs_clusters_measure.csv')
