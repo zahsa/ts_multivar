@@ -112,10 +112,9 @@ class Models1:
         if 'norm_geo' in args.keys():
             self._normalizationGeo = args['norm_geo']
 
-        self.dataset_norm = dataset
-        if self._znorm or self._centralize or self._normalizationGeo:
-            self.dataset_norm = normalize(self.dataset_norm, self._dim_set, verbose=verbose, znorm=self._znorm, centralize=self._centralize, norm_geo=self._normalizationGeo)
-        self._ids = list(self.dataset_norm.keys())
+        self.dataset = dataset
+        self._ids = list(self.dataset.keys())
+        print(len( self._ids))
 
         # methods parameters
         self.ar_prm = 1
@@ -146,10 +145,10 @@ class Models1:
                 self.measures.to_csv(f'{self.path}/features_measures.csv')
             pjt.plot_coeffs_traj(self.coeffs, pd.Series(np.zeros(self.coeffs.shape[0])), folder=self.path)
 
-            pickle.dump(self.dm, open(f'{self.path}/features_distance.p', 'wb'))
-            df_features = pd.DataFrame(self.dm)
-            df_features.to_csv(f'{self.path}/features_distance.csv')
-            self.dm_path = f'{self.path}/features_distance.p'
+            # pickle.dump(self.dm, open(f'{self.path}/features_distance.p', 'wb'))
+            # df_features = pd.DataFrame(self.dm)
+            # df_features.to_csv(f'{self.path}/features_distance.csv')
+            # self.dm_path = f'{self.path}/features_distance.p'
 
     def arima_coefs(self):
         """
@@ -176,8 +175,8 @@ class Models1:
         self.coeffs[np.isnan(self.coeffs)] = 0
         scaler = MinMaxScaler().fit(self.coeffs)
         self.coeffs = scaler.transform(self.coeffs)
-        self.dm = squareform(pdist(self.coeffs))
-        self.dm = self.dm / self.dm.max()
+        # self.dm = squareform(pdist(self.coeffs))
+        # self.dm = self.dm / self.dm.max()
 
     def ou(self):
         """
@@ -192,8 +191,8 @@ class Models1:
         scaler = MinMaxScaler()
         scaler.fit(self.coeffs)
         self.coeffs = scaler.transform(self.coeffs)
-        self.dm = squareform(pdist(self.coeffs))
-        self.dm = self.dm / self.dm.max()
+        # self.dm = squareform(pdist(self.coeffs))
+        # self.dm = self.dm / self.dm.max()
 
     ### functions to parallelize ###
     def _arima_func(self, i, measure_pd, coeffs):
@@ -201,11 +200,11 @@ class Models1:
         It computes ARIMA model for one trajectory.
         """
         coeffs_i = np.array([])
-        measure_list = [self.dataset_norm[self._ids[i]]['mmsi'][0]]
+        measure_list = [self.dataset[self._ids[i]]['mmsi'][0]]
         if self.verbose:
             print(f"Computing {i} of {len(self._ids)}")
         for dim in self._dim_set:
-            st = self.dataset_norm[self._ids[i]][dim]
+            st = self.dataset[self._ids[i]][dim]
             model = sm.tsa.SARIMAX(st, order=(self.ar_prm, self.i_prm, self.ma_prm), trend='c',
                                    enforce_stationarity=False)
             res = model.fit(disp=False)
@@ -222,11 +221,11 @@ class Models1:
         coeffs_i = np.array([])
         if self.verbose:
             print(f"Computing {i} of {len(self._ids)}")
-        st_time = self.dataset_norm[self._ids[i]]['time'].astype('datetime64[s]')
+        st_time = self.dataset[self._ids[i]]['time'].astype('datetime64[s]')
         st_time = np.hstack((0, np.diff(st_time).cumsum().astype('float')))
 
         for dim in self._dim_set:
-            st = self.dataset_norm[self._ids[i]][dim]
+            st = self.dataset[self._ids[i]][dim]
             st = st.reshape((1, len(st)))
             res = ou.ou_process(st_time, st)
             coeffs_i = np.hstack((coeffs_i, res))
