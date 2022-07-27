@@ -81,7 +81,7 @@ def sc_bar_plt(data, folder='./results_data/'):
     plt.close()
 
 
-def statistics(dataset, col='trajectory', folder='./results_data/'):
+def statistics(dataset, col='trips', folder='./results_data/'):
     """
     It computes the statistics based on one attribute.
     :param dataset: the dataset
@@ -120,8 +120,8 @@ def statistics_clusters(dataset, col='Clusters', folder='./results_data/'):
     """
     N = dataset[col].unique()
 
-    trajectory_df = dataset.loc[:, ['trajectory', 'scores-3std', 'Clusters', 'silhouette']]
-    trajectory_df.drop_duplicates('trajectory', inplace=True)
+    trajectory_df = dataset.loc[:, ['trips', 'scores-3std', 'Clusters', 'silhouette']]
+    trajectory_df.drop_duplicates('trips', inplace=True)
 
     avg = dataset[['lat', 'lon']].mean(axis=0)
     std = dataset[['lat', 'lon']].std(axis=0)
@@ -141,7 +141,7 @@ def statistics_clusters(dataset, col='Clusters', folder='./results_data/'):
 
     id_statistcs.to_csv(f'{folder}/statistcs_clusters_measure.csv')
     barplot(id_statistcs[[col, 'non-outliers']], more=id_statistcs[[col, 'outliers']], xlabel='Clusters',
-            ylabel='Number of trajectorys', file=f'{folder}/cluster_count_non-outliers.png')
+            ylabel='Number of trips', file=f'{folder}/cluster_count_non-outliers.png')
 
     return avg, std, id_statistcs
 
@@ -155,7 +155,7 @@ def file_statistics(file, directory):
     dataset = pd.read_csv(file)
     dataset['time'] = dataset['time'].astype('datetime64[ns]')
 
-    trajectory_df = dataset.loc[:, ['trajectory', 'silhouette', 'Clusters', 'threshold_std']]
+    trajectory_df = dataset.loc[:, ['trips', 'silhouette', 'Clusters', 'threshold_std']]
     trajectory_df.drop_duplicates(inplace=True)
     sc_bar_plt(trajectory_df[['silhouette', 'Clusters', 'threshold_std']], folder=directory)
 

@@ -230,7 +230,7 @@ class Models1:
             res = ou.ou_process(st_time, st)
             coeffs_i = np.hstack((coeffs_i, res))
 
-        coeffs[i] = coeffs_i
+        coeffs[self._ids[i]] = coeffs_i
 
     def create_data_dict(self):
         """

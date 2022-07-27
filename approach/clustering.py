@@ -308,20 +308,20 @@ class Clustering:
         """
         data = pd.read_csv(self.ais_data_path)
         print('label error')
-        labels = pd.DataFrame([self.labels], columns=data['trajectory'].unique()).to_dict('records')[0]
-        aux = data['trajectory']
+        labels = pd.DataFrame([self.labels], columns=data['trips'].unique()).to_dict('records')[0]
+        aux = data['trips']
         aux = aux.map(labels)
         aux.name = 'Clusters'
         cluster_dataset = pd.concat([data, aux], axis=1)
 
-        sc = pd.DataFrame([self.SC_sample], columns=data['trajectory'].unique()).to_dict('records')[0]
-        aux = data['trajectory']
+        sc = pd.DataFrame([self.SC_sample], columns=data['trips'].unique()).to_dict('records')[0]
+        aux = data['trips']
         aux = aux.map(sc)
         aux.name = 'silhouette'
         cluster_dataset = pd.concat([cluster_dataset, aux], axis=1)
 
-        aux_data = cluster_dataset[['trajectory', 'silhouette']].copy()
-        aux_data.drop_duplicates(['trajectory'], inplace=True)
+        aux_data = cluster_dataset[['trips', 'silhouette']].copy()
+        aux_data.drop_duplicates(['trips'], inplace=True)
 
         limit_std = aux_data['silhouette'].mean() - 3 * aux_data['silhouette'].std()
         aux[aux > limit_std] = 1

@@ -6,10 +6,10 @@ from datetime import datetime
 # Number of vessels
 n_samples = None
 # Fishing type
-vessel_type = [30, 1001, 1002]
+vessel_type = [30]
 # Time period
 start_day = datetime(2020, 4, 1)
-end_day = datetime(2020, 4, 30)
+end_day = datetime(2020, 4, 7)
 # Attributes
 dim_set = ['lat', 'lon']
 # Creating dataset

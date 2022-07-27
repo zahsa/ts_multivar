@@ -61,7 +61,7 @@ if not os.path.exists(cl_path_ou_hc):
 else:
     print('HC 5 exist')
     result_ou_2 = pd.read_csv(cl_path_ou_hc)
-    result_ou_2 = result_ou_2.groupby('mmsi').first()['Clusters']
+    result_ou_2 = result_ou_2.groupby('trips').first()['Clusters']
 
 cl_path_ou_spectral = './results/DCAIS_example/OU/spectral/spectral_5.csv'
 if not os.path.exists(cl_path_ou_spectral):
@@ -70,7 +70,7 @@ if not os.path.exists(cl_path_ou_spectral):
 else:
     print('SC 5 exist')
     result_ou_3 = pd.read_csv(cl_path_ou_spectral)
-    result_ou_3 = result_ou_3.groupby('mmsi').first()['Clusters']
+    result_ou_3 = result_ou_3.groupby('trips').first()['Clusters']
 
 ### Runing clustering ARIMA
 print('Clustering ARIMA...')
@@ -83,7 +83,7 @@ if not os.path.exists(cl_path_arima_hc):
 else:
     print('HC 5 exist')
     result_arima_2 = pd.read_csv(cl_path_arima_hc)
-    result_arima_2 = result_arima_2.groupby('mmsi').first()['Clusters']
+    result_arima_2 = result_arima_2.groupby('trips').first()['Clusters']
 
 cl_path_arima_spectral = 'results/DCAIS_example/ARIMA/spectral/spectral_5.csv'
 if not os.path.exists(cl_path_arima_spectral):
@@ -92,7 +92,7 @@ if not os.path.exists(cl_path_arima_spectral):
 else:
     print('SC 5 exist')
     result_arima_3 = pd.read_csv(cl_path_arima_spectral)
-    result_arima_3 = result_arima_3.groupby('mmsi').first()['Clusters']
+    result_arima_3 = result_arima_3.groupby('trips').first()['Clusters']
 
 ### Runing clustering
 print('Clustering VAR...')
@@ -105,7 +105,7 @@ if not os.path.exists(cl_path_var_hc):
 else:
     print('HC 5 exist')
     result_2 = pd.read_csv(cl_path_var_hc)
-    result_2 = result_2.groupby('mmsi').first()['Clusters']
+    result_2 = result_2.groupby('trips').first()['Clusters']
 
 cl_path_var_spectral = './results/DCAIS_example/VAR/spectral/spectral_5.csv'
 if not os.path.exists(cl_path_var_spectral):
@@ -114,7 +114,7 @@ if not os.path.exists(cl_path_var_spectral):
 else:
     print('SC 5 exist')
     result_3 = pd.read_csv(cl_path_var_spectral)
-    result_3 = result_3.groupby('mmsi').first()['Clusters']
+    result_3 = result_3.groupby('trips').first()['Clusters']
 
 #NMI
 print('OU vs ARIMA')
