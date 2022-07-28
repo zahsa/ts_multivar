@@ -51,8 +51,8 @@ else:
 
 ### Runing clustering OU
 print('Clustering OU...')
-
-# result_ou_1 = Clustering(ais_data_path=dataset.preprocessed_path, dm=features_ou, cluster_algorithm='dbscan', folder=f'./results/DCAIS_example/OU/', norm_dist=False)
+result_ou_1 = Clustering(ais_data_path=dataset.preprocessed_path, dm=features_ou, cluster_algorithm='dbscan', folder=f'./results/DCAIS_example/OU/', norm_dist=False)
+result_ou_1 = result_ou_1.labels
 
 cl_path_ou_hc = './results/DCAIS_example/OU/hierarchical-average/hierarchical_5_average.csv'
 if not os.path.exists(cl_path_ou_hc):
@@ -72,9 +72,13 @@ else:
     result_ou_3 = pd.read_csv(cl_path_ou_spectral)
     result_ou_3 = result_ou_3.groupby('trips').first()['Clusters']
 
+result_ou_4 = Clustering(ais_data_path=dataset.preprocessed_path, dm=features_ou, cluster_algorithm='hdbscan', folder=f'./results/DCAIS_example/OU/', norm_dist=False)
+result_ou_4 = result_ou_4.labels
+
 ### Runing clustering ARIMA
 print('Clustering ARIMA...')
-# result_arima_1 = Clustering(ais_data_path=dataset.preprocessed_path, dm=features_arima, cluster_algorithm='dbscan', folder=f'./results/DCAIS_example/ARIMA/', norm_dist=False)
+result_arima_1 = Clustering(ais_data_path=dataset.preprocessed_path, dm=features_arima, cluster_algorithm='dbscan', folder=f'./results/DCAIS_example/ARIMA/', norm_dist=False)
+result_arima_1 = result_arima_1.labels
 
 cl_path_arima_hc = 'results/DCAIS_example/ARIMA/hierarchical-average/hierarchical_5_average.csv'
 if not os.path.exists(cl_path_arima_hc):
@@ -94,9 +98,13 @@ else:
     result_arima_3 = pd.read_csv(cl_path_arima_spectral)
     result_arima_3 = result_arima_3.groupby('trips').first()['Clusters']
 
+result_arima_4 = Clustering(ais_data_path=dataset.preprocessed_path, dm=features_arima, cluster_algorithm='hdbscan', folder=f'./results/DCAIS_example/ARIMA/', norm_dist=False)
+result_arima_4 = result_arima_4.labels
+
 ### Runing clustering
 print('Clustering VAR...')
-# result_1 = Clustering(ais_data_path=dataset.preprocessed_path, dm=features, cluster_algorithm='dbscan', folder=f'./results/DCAIS_example/', norm_dist=False)
+result_1 = Clustering(ais_data_path=dataset.preprocessed_path, dm=features, cluster_algorithm='dbscan', folder=f'./results/DCAIS_example/VAR/', norm_dist=False)
+result_1 = result_1.labels
 
 cl_path_var_hc = './results/DCAIS_example/VAR/hierarchical-average/hierarchical_5_average.csv'
 if not os.path.exists(cl_path_var_hc):
@@ -116,18 +124,21 @@ else:
     result_3 = pd.read_csv(cl_path_var_spectral)
     result_3 = result_3.groupby('trips').first()['Clusters']
 
+result_4 = Clustering(ais_data_path=dataset.preprocessed_path, dm=features, cluster_algorithm='hdbscan', folder=f'./results/DCAIS_example/VAR/', norm_dist=False)
+result_4 = result_4.labels
+
 #NMI
 print('OU vs ARIMA')
-# print(normalized_mutual_info_score(result_ou_1.labels, result_arima_1.labels))
+print(adjusted_rand_score(result_ou_1, result_arima_1))
 print(adjusted_rand_score(result_ou_2, result_arima_2))
 print(adjusted_rand_score(result_ou_3, result_arima_3))
 
 print('ARIMA vs VAR')
-# print(normalized_mutual_info_score(result_arima_1.labels, result_1.labels))
+print(adjusted_rand_score(result_arima_1, result_1))
 print(adjusted_rand_score(result_arima_2, result_2))
 print(adjusted_rand_score(result_arima_3, result_3))
 
 print('OU vs VAR')
-# print(normalized_mutual_info_score(result_ou_1.labels, result_1.labels))
+print(adjusted_rand_score(result_ou_1, result_1))
 print(adjusted_rand_score(result_ou_2, result_2))
 print(adjusted_rand_score(result_ou_3, result_3))

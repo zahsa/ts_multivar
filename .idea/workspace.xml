@@ -6,12 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="f0eae4f8-0f00-4b3d-882d-2966238b9034" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis/statistics.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/statistics.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/approach/ar_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/approach/ar_models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/approach/clustering.py" beforeDir="false" afterPath="$PROJECT_DIR$/approach/clustering.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main_var.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_var.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pleasure_craft.py" beforeDir="false" afterPath="$PROJECT_DIR$/pleasure_craft.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocessing/clean_trajectories.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/clean_trajectories.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/seg.py" beforeDir="false" afterPath="$PROJECT_DIR$/seg.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -62,7 +58,7 @@
       <recent name="C:\Users\Martha\Documents\project\ts_multivar\results\DCAIS_example\VAR" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.pleasure_craft">
+  <component name="RunManager" selected="Python.seg">
     <configuration name="main_var" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ts_multivar" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -130,9 +126,9 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.seg" />
         <item itemvalue="Python.pleasure_craft" />
         <item itemvalue="Python.main_var" />
-        <item itemvalue="Python.seg" />
       </list>
     </recent_temporary>
   </component>
@@ -167,7 +163,7 @@
       <workItem from="1658777453562" duration="1939000" />
       <workItem from="1658838433609" duration="11452000" />
       <workItem from="1658858440815" duration="5960000" />
-      <workItem from="1658925464674" duration="13546000" />
+      <workItem from="1658925464674" duration="20621000" />
     </task>
     <task id="LOCAL-00001" summary="including normalization into preprocessing and clustering">
       <created>1654625546633</created>
@@ -211,7 +207,14 @@
       <option name="project" value="LOCAL" />
       <updated>1658759711710</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="segment trajectories into trips">
+      <created>1658946033591</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1658946033591</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -235,7 +238,8 @@
     <MESSAGE value="pleasure craft + NMI + univariate" />
     <MESSAGE value="fizing path bug" />
     <MESSAGE value="fixing path bug segmentation example" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixing path bug segmentation example" />
+    <MESSAGE value="segment trajectories into trips" />
+    <option name="LAST_COMMIT_MESSAGE" value="segment trajectories into trips" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -247,7 +251,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/approach/clustering.py</url>
-          <line>316</line>
+          <line>342</line>
           <option name="timeStamp" value="8" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

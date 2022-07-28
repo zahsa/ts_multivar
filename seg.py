@@ -26,7 +26,7 @@ if __name__ == "__main__":
     your_time_series = (your_time_series - your_time_series.min()) / (your_time_series.max() - your_time_series.min())
 
     # your_time_series = np.random.rand(3, 100)
-    window_size = 200  # Approximately, how many data points might be found in a pattern
+    window_size = 50  # Approximately, how many data points might be found in a pattern
 
     mps, indices = stumpy.mstump(your_time_series, m=window_size)
 
@@ -84,37 +84,37 @@ if __name__ == "__main__":
         axs[k].plot(your_time_series[k])
         axs[k].set_xlabel('Time', fontsize='20')
 
-        axs[k+ mps.shape[0]].set_ylabel(k, fontsize='20')
-        axs[k+ mps.shape[0]].plot(var_adwin[k])
-        axs[k+ mps.shape[0]].set_xlabel('Time', fontsize='20')
+        # axs[k+ mps.shape[0]].set_ylabel(k, fontsize='20')
+        # axs[k+ mps.shape[0]].plot(var_adwin[k])
+        # axs[k+ mps.shape[0]].set_xlabel('Time', fontsize='20')
 
-        # axs[k + mps.shape[0]].set_ylabel(k, fontsize='20')
-        # axs[k + mps.shape[0]].plot(mps[k], c='orange')
-        # axs[k + mps.shape[0]].set_xlabel('Time', fontsize='20')
+        axs[k + mps.shape[0]].set_ylabel(k, fontsize='20')
+        axs[k + mps.shape[0]].plot(mps[k], c='orange')
+        axs[k + mps.shape[0]].set_xlabel('Time', fontsize='20')
 
-        # axs[k].axvline(x=motifs_idx[1], linestyle="dashed", c='black')
-        # axs[k].axvline(x=nn_idx[1], linestyle="dashed", c='black')
-        axs[k + mps.shape[0]].axvline(x=motifs_idx[1], linestyle="dashed", c='black')
-        axs[k + mps.shape[0]].axvline(x=nn_idx[1], linestyle="dashed", c='black')
+        axs[k].axvline(x=motifs_idx[1], linestyle="dashed", c='black')
+        axs[k].axvline(x=nn_idx[1], linestyle="dashed", c='black')
+        # axs[k + mps.shape[0]].axvline(x=motifs_idx[1], linestyle="dashed", c='black')
+        # axs[k + mps.shape[0]].axvline(x=nn_idx[1], linestyle="dashed", c='black')
 
-        for j in range(len(idx_adwin[k])):
-            axs[k].axvline(x=idx_adwin[k][j], linestyle="dashed", c='black')
-        for j in range(len(all_idx_adwin)):
-            axs[k].axvline(x=all_idx_adwin[j], linestyle="dashed", c='red')
+        # for j in range(len(idx_adwin[k])):
+        #     axs[k].axvline(x=idx_adwin[k][j], linestyle="dashed", c='black')
+        # for j in range(len(all_idx_adwin)):
+        #     axs[k].axvline(x=all_idx_adwin[j], linestyle="dashed", c='red')
         # for j in range(len(idx_cd[k])):
         #     axs[k+ mps.shape[0]].axvline(x=idx_cd[k][j], linestyle="dashed", c='blue')
 
-        # if k != 2:
-        #     axs[k].plot(range(motifs_idx[k], motifs_idx[k] + window_size), your_time_series[k][motifs_idx[k]: motifs_idx[k] + window_size],
-        #                 c='red', linewidth=4)
-        #     axs[k].plot(range(nn_idx[k], nn_idx[k] + window_size), your_time_series[k][nn_idx[k]: nn_idx[k] + window_size], c='red',
-        #                 linewidth=4)
-        #     axs[k + mps.shape[0]].plot(motifs_idx[k], mps[k, motifs_idx[k]] + 1, marker="v", markersize=10, color='red')
-        #     axs[k + mps.shape[0]].plot(nn_idx[k], mps[k, nn_idx[k]] + 1, marker="v", markersize=10, color='red')
-        # else:
-        #     axs[k + mps.shape[0]].plot(motifs_idx[k], mps[k, motifs_idx[k]] + 1, marker="v", markersize=10,
-        #                                color='black')
-        #     axs[k + mps.shape[0]].plot(nn_idx[k], mps[k, nn_idx[k]] + 1, marker="v", markersize=10, color='black')
+        if k != 2:
+            axs[k].plot(range(motifs_idx[k], motifs_idx[k] + window_size), your_time_series[k][motifs_idx[k]: motifs_idx[k] + window_size],
+                        c='red', linewidth=4)
+            axs[k].plot(range(nn_idx[k], nn_idx[k] + window_size), your_time_series[k][nn_idx[k]: nn_idx[k] + window_size], c='red',
+                        linewidth=4)
+            axs[k + mps.shape[0]].plot(motifs_idx[k], mps[k, motifs_idx[k]] + 1, marker="v", markersize=10, color='red')
+            axs[k + mps.shape[0]].plot(nn_idx[k], mps[k, nn_idx[k]] + 1, marker="v", markersize=10, color='red')
+        else:
+            axs[k + mps.shape[0]].plot(motifs_idx[k], mps[k, motifs_idx[k]] + 1, marker="v", markersize=10,
+                                       color='black')
+            axs[k + mps.shape[0]].plot(nn_idx[k], mps[k, nn_idx[k]] + 1, marker="v", markersize=10, color='black')
 
     plt.show()
 
