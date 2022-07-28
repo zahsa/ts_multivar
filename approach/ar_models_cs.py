@@ -80,6 +80,7 @@ class Models:
         self.dataset = dataset
         self._ids = list(self.dataset.keys())
         # self._ids = list(range(len(self.dataset_norm.keys())))
+        print(len(self._ids))
 
         _metrics_dict = self.create_data_dict()
         _metrics_dict[self.features_opt]()
@@ -97,10 +98,10 @@ class Models:
                 self.measures.to_csv(f'{self.path}/features_measures.csv')
             # pjt.plot_coeffs_traj(self.coeffs, pd.Series(np.zeros(self.coeffs.shape[0])), folder=self.path)
 
-            pickle.dump(self.dm, open(f'{self.path}/features_distance.p', 'wb'))
-            df_features = pd.DataFrame(self.dm)
-            df_features.to_csv(f'{self.path}/features_distance.csv')
-            self.dm_path = f'{self.path}/features_distance.p'
+            # pickle.dump(self.dm, open(f'{self.path}/features_distance.p', 'wb'))
+            # df_features = pd.DataFrame(self.dm)
+            # df_features.to_csv(f'{self.path}/features_distance.csv')
+            # self.dm_path = f'{self.path}/features_distance.p'
 
     def var_coefs(self):
         """

@@ -9,8 +9,10 @@ from datetime import timedelta
 import warnings
 import ssl
 from matplotlib import pyplot as plt
+from haversine import haversine
 
 ssl._create_default_https_context = ssl._create_unverified_context
+
 
 def normalize(x, dim_set, verbose=True):
     """
@@ -44,6 +46,7 @@ def missing_values_treatment(x):
     # missing and invalid values in sog and cog are removed
     if 'sog' in x.columns:
         x.loc[x['sog'] == 'None', 'sog'] = -1
+        x.loc[x['sog'] > 60, 'sog'] = -1
         x.sog = x.sog.astype('float64')
         x = x.drop(x[x['sog'] == -1].index)
     if 'cog' in x.columns:
@@ -184,6 +187,7 @@ class Trajectories:
         day_name = f'{time_period[0].day:02d}-{time_period[0].month:02d}_to_{time_period[1].day:02d}-{time_period[1].month:02d}'
         self.dataset_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{day_name}_time_period.csv"
         self.cleaned_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{day_name}_clean.csv"
+        self.segmentation_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{day_name}_trips.csv"
         self.preprocessed_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{self._nsamples}-mmsi_{day_name}_trips.csv"
         # self.preprocessed_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{self._nsamples}-mmsi_{day_name}_trips_prune.csv"
 
@@ -203,11 +207,17 @@ class Trajectories:
         else:
             print('path2 exists')
 
+        if not os.path.exists(self.segmentation_path):
+            self.trips_segmentation()
+            print(f'Clean data save at: {self.segmentation_path}')
+        else:
+            print('path3 exists')
+
         if not os.path.exists(self.preprocessed_path):
             self.mmsi_trips_prune()
             print(f'Preprocessed trips data save at: {self.preprocessed_path}')
         else:
-            print('path3 exists')
+            print('path4 exists')
 
     def cleaning(self):
         """
@@ -233,6 +243,60 @@ class Trajectories:
         plt.gca().set(title=title, xlabel=xlabel, ylabel=ylabel)
         plt.show()
 
+    def trips_segmentation(self):
+        # reading dataset of a time period
+        dataset = pd.read_csv(self.cleaned_path, parse_dates=['time'])
+        dataset['time'] = dataset['time'].astype('datetime64[ns]')
+        dataset = dataset.sort_values(by=['mmsi', "time"])
+        new_dataset = pd.DataFrame()
+
+        ids = dataset['mmsi'].unique()
+        trips = 0
+        # create trajectories
+        count_mmsi = 0
+        for id in ids:
+            print(f'\t Segmenting trajectory {count_mmsi} of {len(ids)}')
+            trajectory = dataset[dataset['mmsi'] == id]
+
+            #segment by time
+            duration_step = trajectory['time'].diff()
+            idx = duration_step[duration_step.apply(lambda x: x.days) > 1].index.to_list()
+
+            #segment by distance
+            def pandas_dist(x, y):
+                return haversine(x, y)
+
+            trajectory['point'] = list(zip(trajectory['lat'], trajectory['lon']))
+            trajectory['point1'] = trajectory['point'].shift(1)
+            trajectory['point1'] = trajectory['point1'].combine_first(trajectory.point)
+            distance_step = trajectory.apply(lambda x: pandas_dist(x['point'], x['point1']), axis=1)
+            idx2 = distance_step[distance_step > 10].index.to_list()
+            idx = list(set(idx + idx2))
+
+            idx.append(duration_step.index[-1])
+            idx.sort()
+            init = 0
+            for k in idx:
+                trajectory.loc[init:k,'trips'] = trips
+                trips = trips + 1
+                init = k
+            trips = trips + 1
+
+            #remove unecessary columns
+            trajectory.drop(['point', 'point1'], axis=1, inplace=True)
+            # add trajectory
+            new_dataset = pd.concat([new_dataset, trajectory], axis=0, ignore_index=True)
+            count_mmsi = count_mmsi + 1
+
+        #remove trips with less min obs
+        count_trips = new_dataset.groupby('trips').count()
+        idx = count_trips[count_trips['mmsi'] < self.min_obs].index
+        new_dataset = new_dataset[new_dataset['trips'].isin(idx) == False]
+
+        #save file
+        new_dataset.to_csv(self.segmentation_path, index=False)
+
+
     def mmsi_trips_prune(self):
         """
         It reads the DCAIS dataset, select MMSI randomly if a number of samples is defined.
@@ -240,25 +304,21 @@ class Trajectories:
         Save the dataset in a csv file.
         """
         # reading dataset of a time period
-        dataset = pd.read_csv(self.cleaned_path, parse_dates=['time'])
+        dataset = pd.read_csv(self.segmentation_path, parse_dates=['time'])
         dataset['time'] = dataset['time'].astype('datetime64[ns]')
         dataset = dataset.sort_values(by=['mmsi', "time"])
 
         # select mmsi randomly
-        ids = dataset['mmsi'].unique()
-        # if self._nsamples is not None:
-        #     random.shuffle(ids)
-        #     ids = ids[0:self._nsamples]
-        #     dataset = dataset[dataset['mmsi'].isin(ids)]
+        ids = dataset['trips'].unique()
 
         dataset = normalize(dataset, ['lat', 'lon'])
 
         new_dataset = pd.DataFrame()
         # create trajectories
-        count_mmsi = 0
+        count_trips = 0
         for id in ids:
-            print(f'\t Cleaning trajectory {count_mmsi} of {len(ids)}')
-            trajectory = dataset[dataset['mmsi'] == id] #z: collecting all rows with the same id, gives us a trajectory of one vessel
+            print(f'\t Cleaning trajectory {count_trips} of {len(ids)}')
+            trajectory = dataset[dataset['trips'] == id] #z: collecting all rows with the same id, gives us a trajectory of one vessel
 
             # selecting the region
             isin_region = True
@@ -269,32 +329,17 @@ class Trajectories:
 
             # if is inside the selected region and contains enough observations
             if (trajectory.shape[0] >= self.min_obs) and isin_region:
-                # include sub trajectory id and total time
-                aux_col = pd.DataFrame({'trajectory': np.repeat(count_mmsi, trajectory.shape[0])})
-                trajectory.reset_index(drop=True, inplace=True)
-                trajectory = pd.concat([aux_col, trajectory], axis=1)
-
-                # time period between observations = delta time
-                duration_step = trajectory['time'].diff().iloc[1:(trajectory.shape[0])]
-                duration_step = duration_step.apply(lambda x: x.total_seconds())
-                # add the delta time
-                trajectory = trajectory.assign(duration=pd.Series(duration_step, index=trajectory.index))
-                trajectory['duration'] = trajectory['duration'].fillna(0)
-                total_time = trajectory['duration'].cumsum().iloc[-1] / 3600
-                trajectory = trajectory.assign(total_time=pd.Series(np.repeat(total_time, trajectory.shape[0]), index=trajectory.index))
-
-                # add trajectory
                 # remove trajectories with constant values
                 if np.var(trajectory.lat_norm) > self.threshold and np.var(trajectory.lon_norm) > self.threshold:
+                    # add trajectory
                     new_dataset = pd.concat([new_dataset, trajectory], axis=0, ignore_index=True)
-                    count_mmsi = count_mmsi + 1
-
+                    count_trips = count_trips + 1
                 else:
                     print(f'\t\ttrajectory {id} is removed')
             # count_mmsi = count_mmsi + 1 #z if one trajectory is removed then the whole information for one vessel is deleted
          
-        self._nsamples = count_mmsi
-        print(f'{count_mmsi} remaining')
+        self._nsamples = count_trips
+        print(f'{count_trips} remaining')
 
         new_dataset.to_csv(self.preprocessed_path, index=False)
 
@@ -309,17 +354,17 @@ class Trajectories:
 
 
         dataset['time'] = dataset['time'].astype('datetime64[ns]')
-        dataset = dataset.sort_values(by=['trajectory', "time"])
+        dataset = dataset.sort_values(by=['trips', "time"])
 
         new_dataset = {}
-        ids = dataset['trajectory'].unique()
+        ids = dataset['trips'].unique()
         self._nsamples = len(ids)
 
         for id in ids:  # is is corresponding to vessels ids?
             # getting one trajectory
-            trajectory = dataset[dataset['trajectory'] == id]  ## what is trajectory column??
+            trajectory = dataset[dataset['trips'] == id]  ## what is trajectory column??
           
-            trajectory.set_index(['trajectory'])
+            trajectory.set_index(['trips'])
 
             # converting trajectory to dict
             new_dataset[id] = {}

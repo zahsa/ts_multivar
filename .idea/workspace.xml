@@ -4,16 +4,23 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f0eae4f8-0f00-4b3d-882d-2966238b9034" name="Changes" comment="including normalization into preprocessing and clustering">
+    <list default="true" id="f0eae4f8-0f00-4b3d-882d-2966238b9034" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/approach/ar_models_cs.py" beforeDir="false" afterPath="$PROJECT_DIR$/approach/ar_models_cs.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/approach/clustering.py" beforeDir="false" afterPath="$PROJECT_DIR$/approach/clustering.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocessing/clean_trajectories.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/clean_trajectories.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pleasure_craft.py" beforeDir="false" afterPath="$PROJECT_DIR$/pleasure_craft.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/seg.py" beforeDir="false" afterPath="$PROJECT_DIR$/seg.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -35,15 +42,30 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/approach" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
-  <component name="RunManager">
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Martha\Documents\project\ts_multivar\approach" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Martha\Documents\project\ts_multivar\results\DCAIS_example\fish" />
+      <recent name="C:\Users\Martha\Documents\project\ts_multivar\results\DCAIS_example" />
+      <recent name="C:\Users\Martha\Documents\project\ts_multivar\results\DCAIS_example\VAR" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.seg">
     <configuration name="main_var" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ts_multivar" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -59,8 +81,53 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="pleasure_craft" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ts_multivar" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/pleasure_craft.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="seg" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ts_multivar" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/seg.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.main_var" />
+      <item itemvalue="Python.pleasure_craft" />
+      <item itemvalue="Python.seg" />
+    </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.seg" />
+        <item itemvalue="Python.pleasure_craft" />
         <item itemvalue="Python.main_var" />
       </list>
     </recent_temporary>
@@ -77,7 +144,26 @@
       <workItem from="1654533637235" duration="1198000" />
       <workItem from="1654609330253" duration="6086000" />
       <workItem from="1654624847891" duration="1306000" />
-      <workItem from="1654797648824" duration="2946000" />
+      <workItem from="1654797648824" duration="3801000" />
+      <workItem from="1655820409242" duration="1217000" />
+      <workItem from="1655929799692" duration="185000" />
+      <workItem from="1655990102022" duration="1195000" />
+      <workItem from="1656346177646" duration="601000" />
+      <workItem from="1656527775070" duration="644000" />
+      <workItem from="1656602174833" duration="3891000" />
+      <workItem from="1657198629923" duration="2378000" />
+      <workItem from="1657729611968" duration="597000" />
+      <workItem from="1657803721849" duration="4416000" />
+      <workItem from="1658239290807" duration="1661000" />
+      <workItem from="1658342102171" duration="2105000" />
+      <workItem from="1658492471422" duration="16474000" />
+      <workItem from="1658588679762" duration="652000" />
+      <workItem from="1658754567253" duration="6329000" />
+      <workItem from="1658763875727" duration="3851000" />
+      <workItem from="1658777453562" duration="1939000" />
+      <workItem from="1658838433609" duration="11452000" />
+      <workItem from="1658858440815" duration="5960000" />
+      <workItem from="1658925464674" duration="20621000" />
     </task>
     <task id="LOCAL-00001" summary="including normalization into preprocessing and clustering">
       <created>1654625546633</created>
@@ -86,7 +172,49 @@
       <option name="project" value="LOCAL" />
       <updated>1654625546633</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="fixing normalization and cleaning">
+      <created>1654800633275</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1654800633275</updated>
+    </task>
+    <task id="LOCAL-00003" summary="pleasure craft + NMI + univariate">
+      <created>1658502669140</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1658502669140</updated>
+    </task>
+    <task id="LOCAL-00004" summary="fizing path bug">
+      <created>1658510494689</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1658510494689</updated>
+    </task>
+    <task id="LOCAL-00005" summary="fizing path bug">
+      <created>1658510573474</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1658510573474</updated>
+    </task>
+    <task id="LOCAL-00006" summary="fixing path bug segmentation example">
+      <created>1658759711710</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1658759711710</updated>
+    </task>
+    <task id="LOCAL-00007" summary="segment trajectories into trips">
+      <created>1658946033591</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1658946033591</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -106,25 +234,42 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="including normalization into preprocessing and clustering" />
-    <option name="LAST_COMMIT_MESSAGE" value="including normalization into preprocessing and clustering" />
+    <MESSAGE value="fixing normalization and cleaning" />
+    <MESSAGE value="pleasure craft + NMI + univariate" />
+    <MESSAGE value="fizing path bug" />
+    <MESSAGE value="fixing path bug segmentation example" />
+    <MESSAGE value="segment trajectories into trips" />
+    <option name="LAST_COMMIT_MESSAGE" value="segment trajectories into trips" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/approach/ar_models_cs.py</url>
-          <line>173</line>
+          <line>174</line>
           <option name="timeStamp" value="5" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/approach/clustering.py</url>
+          <line>342</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/seg.py</url>
+          <line>52</line>
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/preprocessing/clean_trajectories.py</url>
-          <line>257</line>
-          <option name="timeStamp" value="6" />
+          <line>296</line>
+          <option name="timeStamp" value="16" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/ts_multivar$main_var.coverage" NAME="main_var Coverage Results" MODIFIED="1654799958872" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ts_multivar$seg.coverage" NAME="seg Coverage Results" MODIFIED="1658851383406" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ts_multivar$main_var.coverage" NAME="main_var Coverage Results" MODIFIED="1658931924855" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ts_multivar$pleasure_craft.coverage" NAME="pleasure_craft Coverage Results" MODIFIED="1658937322085" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

@@ -1,4 +1,5 @@
 from sklearn.cluster import DBSCAN, SpectralClustering, AgglomerativeClustering
+import hdbscan
 import os, pickle
 import numpy as np
 import matplotlib.pyplot as plt
@@ -49,7 +50,7 @@ def my_hierarchical(data, **args):
 
     data[np.isnan(data)] = 0
     clustering = AgglomerativeClustering(n_clusters=k, linkage=linkage, distance_threshold=thr)
-    clustering.fit(data)
+    clustering.fit_predict(data)
 
     return clustering
 
@@ -76,6 +77,27 @@ def my_spectral(data, **args):
     data = 1 - data
     # data = np.exp(- data ** 2 / (2. * delta ** 2))
     clustering = SpectralClustering(n_clusters=k, n_components=n_eigenvectors, assign_labels="kmeans", random_state=42, n_init=1)
+    clustering.fit(data)
+
+    return clustering
+
+
+def my_hdbscan(data, ** args):
+    """
+    It generates the hdbscan clustering
+    :param data: the distance matrix
+    :return: the labels
+    """
+    min_cluster_size = 7
+    if 'min_cluster_size' in args.keys():
+        min_cluster_size = args['min_cluster_size']
+
+    min_samples = 3
+    if 'min_samples' in args.keys():
+        min_samples = args['min_samples']
+
+
+    clustering = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples, metric='precomputed')
     clustering.fit(data)
 
     return clustering
@@ -126,7 +148,8 @@ def create_algorithms_dict():
     """
     return {'dbscan': my_DBSCAN,
             'hierarchical': my_hierarchical,
-            'spectral': my_spectral}
+            'spectral': my_spectral,
+            'hdbscan': my_hdbscan}
 
 
 class Clustering:
@@ -210,7 +233,10 @@ class Clustering:
                                                              k=self._k,
                                                              linkage=self._linkage, min_samples=self._min_samples)
         print('error in clustering labels')
-        self.labels = self._model.labels_
+        if self.cluster_algorithm != 'hdbscan':
+            self.labels = self._model.labels_
+        else:
+            self.labels = self._model
         self.silhouette()
         if self.path is not None:
             if self._verbose:
@@ -308,20 +334,20 @@ class Clustering:
         """
         data = pd.read_csv(self.ais_data_path)
         print('label error')
-        labels = pd.DataFrame([self.labels], columns=data['trajectory'].unique()).to_dict('records')[0]
-        aux = data['trajectory']
+        labels = pd.DataFrame([self.labels], columns=data['trips'].unique()).to_dict('records')[0]
+        aux = data['trips']
         aux = aux.map(labels)
         aux.name = 'Clusters'
         cluster_dataset = pd.concat([data, aux], axis=1)
 
-        sc = pd.DataFrame([self.SC_sample], columns=data['trajectory'].unique()).to_dict('records')[0]
-        aux = data['trajectory']
+        sc = pd.DataFrame([self.SC_sample], columns=data['trips'].unique()).to_dict('records')[0]
+        aux = data['trips']
         aux = aux.map(sc)
         aux.name = 'silhouette'
         cluster_dataset = pd.concat([cluster_dataset, aux], axis=1)
 
-        aux_data = cluster_dataset[['trajectory', 'silhouette']].copy()
-        aux_data.drop_duplicates(['trajectory'], inplace=True)
+        aux_data = cluster_dataset[['trips', 'silhouette']].copy()
+        aux_data.drop_duplicates(['trips'], inplace=True)
 
         limit_std = aux_data['silhouette'].mean() - 3 * aux_data['silhouette'].std()
         aux[aux > limit_std] = 1
