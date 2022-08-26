@@ -11,10 +11,10 @@ import stumpy
 # Number of vessels
 n_samples = None
 # Pleasure type
-vessel_type = [37]
+vessel_type =  [30, 37, 80, 60]
 # Time period
 start_day = datetime(2020, 4, 1)
-end_day = datetime(2020, 6, 30)
+end_day = datetime(2020, 4, 30)
 # Attributes
 dim_set = ['lat', 'lon']
 # Creating dataset

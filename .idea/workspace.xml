@@ -6,9 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="f0eae4f8-0f00-4b3d-882d-2966238b9034" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/approach/clustering.py" beforeDir="false" afterPath="$PROJECT_DIR$/approach/clustering.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocessing/clean_trajectories.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/clean_trajectories.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/seg.py" beforeDir="false" afterPath="$PROJECT_DIR$/seg.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pleasure_craft.py" beforeDir="false" afterPath="$PROJECT_DIR$/pleasure_craft.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,7 +64,7 @@
       <recent name="C:\Users\Martha\Documents\project\ts_multivar\results\DCAIS_example\VAR" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.seg">
+  <component name="RunManager" selected="Python.pleasure_craft">
     <configuration name="main_var" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ts_multivar" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -140,8 +138,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.seg" />
         <item itemvalue="Python.pleasure_craft" />
+        <item itemvalue="Python.seg" />
         <item itemvalue="Python.main_var" />
       </list>
     </recent_temporary>
@@ -188,7 +186,9 @@
       <workItem from="1659699639135" duration="604000" />
       <workItem from="1660142393566" duration="2584000" />
       <workItem from="1661190193839" duration="5777000" />
-      <workItem from="1661254322766" duration="2157000" />
+      <workItem from="1661254322766" duration="4585000" />
+      <workItem from="1661354005673" duration="1747000" />
+      <workItem from="1661359436976" duration="598000" />
     </task>
     <task id="LOCAL-00001" summary="including normalization into preprocessing and clustering">
       <created>1654625546633</created>
@@ -246,7 +246,14 @@
       <option name="project" value="LOCAL" />
       <updated>1659019142504</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="segmentation using stumpy multi variables">
+      <created>1661260123317</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1661260123317</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -272,7 +279,8 @@
     <MESSAGE value="fixing path bug segmentation example" />
     <MESSAGE value="segment trajectories into trips" />
     <MESSAGE value="inclusing hdbscan" />
-    <option name="LAST_COMMIT_MESSAGE" value="inclusing hdbscan" />
+    <MESSAGE value="segmentation using stumpy multi variables" />
+    <option name="LAST_COMMIT_MESSAGE" value="segmentation using stumpy multi variables" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
