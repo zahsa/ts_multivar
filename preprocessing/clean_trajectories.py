@@ -119,7 +119,7 @@ def create_dataset_noaa(path, time_period, vt=None):
     :param vt: vessel type
     :return: path where the csv file was saved
     """
-    columns_read = ['MMSI', 'BaseDateTime', 'LAT', 'LON', 'SOG', 'COG', 'Heading', 'VesselType']
+    columns_read = ['MMSI', 'BaseDateTime', 'LAT', 'LON', 'SOG', 'COG', 'Heading', 'VesselType', 'Length', 'Width']
     dataset = pd.DataFrame()
     mmsis = np.array([])
     for curr_date in date_range(time_period[0], time_period[1]+timedelta(days=1)):

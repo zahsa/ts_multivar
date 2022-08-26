@@ -97,10 +97,10 @@ def my_hdbscan(data, ** args):
         min_samples = args['min_samples']
 
 
-    clustering = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples, metric='precomputed')
-    clustering.fit(data)
+    clustering = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples)
+    labels = clustering.fit_predict(data)
 
-    return clustering
+    return labels
 
 
 def plot_dendrogram(dm, folder):
@@ -227,7 +227,8 @@ class Clustering:
 
         if self._k is None:
             if self.cluster_algorithm != 'dbscan':
-                self._estimate_number_clusters()
+                if self.cluster_algorithm != 'hdbscan':
+                    self._estimate_number_clusters()
 
         self._model = self._alg_dict[self.cluster_algorithm](self.dm, eps=self.eps,
                                                              k=self._k,
