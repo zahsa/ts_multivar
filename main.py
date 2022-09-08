@@ -13,9 +13,9 @@ from matplotlib.ticker import StrMethodFormatter
 # Number of vessels
 n_samples = None
 # Pleasure type
-vessel_type =  [30, 37, 80, 60]
+vessel_type = [30, 32, 34, 36, 37, 52, 60, 71, 80]
 # Time period
-start_day = datetime(2020, 4, 1)
+start_day = datetime(2020, 4, 20)
 end_day = datetime(2020, 4, 30)
 # Attributes
 dim_set = ['lat', 'lon']
