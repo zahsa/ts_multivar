@@ -30,11 +30,11 @@ data_pandas = data_pandas.sort_values(by=['trips', "time"])
 
 print('Analysing dataset')
 #plot of number of trips per vessel type
-data_trips = data_pandas.groupby('trips').first()[['vessel_type', 'flag']]
+data_trips = data_pandas.groupby('trips').first()[['vessel_type']]
 data_trips['lenght'] = data_pandas.groupby('trips').count()['sog']
 data_trips['sog'] = data_pandas.groupby('trips').mean()['sog']
 
-data_vt = data_trips.groupby('vessel_type').count()['flag']
+data_vt = data_trips.groupby('vessel_type').count()['sog']
 
 fig = plt.figure()
 data_vt.plot.bar()

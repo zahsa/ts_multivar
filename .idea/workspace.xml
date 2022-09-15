@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f0eae4f8-0f00-4b3d-882d-2966238b9034" name="Changes" comment="" />
+    <list default="true" id="f0eae4f8-0f00-4b3d-882d-2966238b9034" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/clean_trajectories.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/clean_trajectories.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -66,9 +70,6 @@
       <module name="ts_multivar" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -213,6 +214,9 @@
       <workItem from="1661530848273" duration="389000" />
       <workItem from="1661532016032" duration="10000" />
       <workItem from="1661790530222" duration="707000" />
+      <workItem from="1662647293970" duration="1959000" />
+      <workItem from="1662731518357" duration="1358000" />
+      <workItem from="1663240191560" duration="2984000" />
     </task>
     <task id="LOCAL-00001" summary="including normalization into preprocessing and clustering">
       <created>1654625546633</created>
@@ -291,7 +295,14 @@
       <option name="project" value="LOCAL" />
       <updated>1661790635508</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="selected vessel types">
+      <created>1662647344840</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1662647344840</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -320,7 +331,8 @@
     <MESSAGE value="segmentation using stumpy multi variables" />
     <MESSAGE value="data 4 vessel types april 2020" />
     <MESSAGE value="visualization of the barplots" />
-    <option name="LAST_COMMIT_MESSAGE" value="visualization of the barplots" />
+    <MESSAGE value="selected vessel types" />
+    <option name="LAST_COMMIT_MESSAGE" value="selected vessel types" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -335,16 +347,12 @@
           <line>343</line>
           <option name="timeStamp" value="8" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/preprocessing/clean_trajectories.py</url>
-          <line>296</line>
-          <option name="timeStamp" value="16" />
-        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ts_multivar$seg.coverage" NAME="seg Coverage Results" MODIFIED="1659031628458" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ts_multivar$main.coverage" NAME="main Coverage Results" MODIFIED="1662647333495" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ts_multivar$main_var.coverage" NAME="main_var Coverage Results" MODIFIED="1658931924855" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ts_multivar$pleasure_craft.coverage" NAME="pleasure_craft Coverage Results" MODIFIED="1658937322085" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
