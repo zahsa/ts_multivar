@@ -13,9 +13,9 @@ from matplotlib.ticker import StrMethodFormatter
 # Number of vessels
 n_samples = None
 # Pleasure type
-vessel_type =  [30, 37, 80, 60]
+vessel_type = [30, 32, 34, 36, 37, 52, 60, 71, 80]
 # Time period
-start_day = datetime(2020, 4, 1)
+start_day = datetime(2020, 4, 20)
 end_day = datetime(2020, 4, 30)
 # Attributes
 dim_set = ['lat', 'lon']
@@ -30,11 +30,11 @@ data_pandas = data_pandas.sort_values(by=['trips', "time"])
 
 print('Analysing dataset')
 #plot of number of trips per vessel type
-data_trips = data_pandas.groupby('trips').first()[['vessel_type', 'flag']]
+data_trips = data_pandas.groupby('trips').first()[['vessel_type']]
 data_trips['lenght'] = data_pandas.groupby('trips').count()['sog']
 data_trips['sog'] = data_pandas.groupby('trips').mean()['sog']
 
-data_vt = data_trips.groupby('vessel_type').count()['flag']
+data_vt = data_trips.groupby('vessel_type').count()['sog']
 
 fig = plt.figure()
 data_vt.plot.bar()

@@ -14,6 +14,41 @@ from haversine import haversine
 ssl._create_default_https_context = ssl._create_unverified_context
 
 
+def time_segmentation(data_trips, time_window=3600):
+    # time window in seconds (1h)
+    new_dataset = pd.DataFrame()
+    trips_id = data_trips['trips'].unique()
+    data_trips['segmentation_time'] = 0
+    col = np.where(data_trips.columns == 'segmentation_time')
+    col = int(col[0])
+
+    for id in trips_id:
+        trip = data_trips[data_trips['trips'] == id]
+        delta_T = trip['time'].diff()
+        # get index to segment the trip
+        idx = []
+        msg = 1
+        while msg < trip.shape[0]:
+            # get start point
+            time_in_w = delta_T.iloc[msg]
+            while (time_in_w.seconds <= time_window) and (msg < trip.shape[0]-1):
+                msg = msg + 1
+                time_in_w = time_in_w + delta_T.iloc[msg]
+            idx.append(msg)
+            msg = msg + 1
+        idx.append(trip.shape[0])
+
+        # include the segment id
+        init = 0
+        seg = 0
+        for k in idx:
+            trip.iloc[init:k, col] = seg
+            seg = seg + 1
+            init = k
+        new_dataset = pd.concat([new_dataset, trip], axis=0, ignore_index=True)
+    return new_dataset
+
+
 def normalize(x, dim_set, verbose=True):
     """
     Divides my maximum if lat and lon and computes Z-normalization for remaining attributes
@@ -188,11 +223,11 @@ class Trajectories:
         self.dataset_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{day_name}_time_period.csv"
         self.cleaned_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{day_name}_clean.csv"
         self.segmentation_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{day_name}_trips.csv"
-        self.preprocessed_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{self._nsamples}-mmsi_{day_name}_trips.csv"
+        self.preprocessed_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{self._nsamples}-mmsi_{day_name}_prunning.csv"
         # self.preprocessed_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{self._nsamples}-mmsi_{day_name}_trips_prune.csv"
 
         if self.region is not None:
-            self.preprocessed_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{self._nsamples}-mmsi_region_{self.region}_{day_name}_trips.csv"
+            self.preprocessed_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{self._nsamples}-mmsi_region_{self.region}_{day_name}_prunning.csv"
             # self.preprocessed_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{self._nsamples}-mmsi_region_{self.region}_{day_name}_trips_prune.csv"
 
         if not os.path.exists(self.dataset_path):
@@ -233,7 +268,7 @@ class Trajectories:
         # missing values are replaced to -1 and removed
         dataset = missing_values_treatment(dataset)
         # including country information
-        dataset = include_country(dataset)
+        # dataset = include_country(dataset)
 
         dataset.to_csv(self.cleaned_path, index=False)
 
@@ -292,6 +327,9 @@ class Trajectories:
         count_trips = new_dataset.groupby('trips').count()
         idx = count_trips[count_trips['mmsi'] < self.min_obs].index
         new_dataset = new_dataset[new_dataset['trips'].isin(idx) == False]
+
+        # Segment trips per hour
+        new_dataset = time_segmentation(new_dataset)
 
         #save file
         new_dataset.to_csv(self.segmentation_path, index=False)
