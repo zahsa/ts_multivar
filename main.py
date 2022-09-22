@@ -26,13 +26,13 @@ dataset = Trajectories(n_samples=n_samples, vessel_type=vessel_type, time_period
 print('Reading dataset')
 data_pandas = pd.read_csv(dataset.preprocessed_path, parse_dates=['time'], low_memory=False)
 data_pandas['time'] = data_pandas['time'].astype('datetime64[ns]')
-data_pandas = data_pandas.sort_values(by=['trips', "time"])
+data_pandas = data_pandas.sort_values(by=['trajectory', "time"])
 
 print('Analysing dataset')
 #plot of number of trips per vessel type
-data_trips = data_pandas.groupby('trips').first()[['vessel_type']]
-data_trips['lenght'] = data_pandas.groupby('trips').count()['sog']
-data_trips['sog'] = data_pandas.groupby('trips').mean()['sog']
+data_trips = data_pandas.groupby('trajectory').first()[['vessel_type']]
+data_trips['lenght'] = data_pandas.groupby('trajectory').count()['sog']
+data_trips['sog'] = data_pandas.groupby('trajectory').mean()['sog']
 
 data_vt = data_trips.groupby('vessel_type').count()['sog']
 

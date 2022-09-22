@@ -222,6 +222,7 @@ class Trajectories:
         day_name = f'{time_period[0].day:02d}-{time_period[0].month:02d}_to_{time_period[1].day:02d}-{time_period[1].month:02d}'
         self.dataset_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{day_name}_time_period.csv"
         self.cleaned_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{day_name}_clean.csv"
+        self.trajectories_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{day_name}_traj.csv"
         self.segmentation_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{day_name}_trips.csv"
         self.preprocessed_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{self._nsamples}-mmsi_{day_name}_prunning.csv"
         # self.preprocessed_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{self._nsamples}-mmsi_{day_name}_trips_prune.csv"
@@ -241,6 +242,12 @@ class Trajectories:
             print(f'Clean data save at: {self.cleaned_path}')
         else:
             print('path2 exists')
+
+        if not os.path.exists(self.trajectories_path):
+            self.trajectories()
+            print(f'Trajectory data save at: {self.trajectories_path}')
+        else:
+            print('path2.1 exists')
 
         if not os.path.exists(self.segmentation_path):
             self.trips_segmentation()
@@ -277,6 +284,33 @@ class Trajectories:
         plt.plot(x, y, color='tab:red')
         plt.gca().set(title=title, xlabel=xlabel, ylabel=ylabel)
         plt.show()
+
+    def trajectories(self):
+        # reading dataset of a time period
+        dataset = pd.read_csv(self.cleaned_path, parse_dates=['time'])
+        dataset['time'] = dataset['time'].astype('datetime64[ns]')
+        dataset = dataset.sort_values(by=['mmsi', "time"])
+        new_dataset = pd.DataFrame()
+
+        ids = dataset['mmsi'].unique()
+        trajectories = 0
+        # create trajectories
+        count_mmsi = 0
+        for id in ids:
+            print(f'\t Segmenting trajectory {count_mmsi} of {len(ids)}')
+            trajectory = dataset[dataset['mmsi'] == id]
+            trajectory['trajectory'] = id
+
+            # add trajectory
+            new_dataset = pd.concat([new_dataset, trajectory], axis=0, ignore_index=True)
+            count_mmsi = count_mmsi + 1
+
+            # remove trips with less min obs
+        count_traj = new_dataset.groupby('trajectory').count()
+        idx = count_traj[count_traj['mmsi'] < self.min_obs].index
+        new_dataset = new_dataset[new_dataset['trajectory'].isin(idx) == False]
+        # save file
+        new_dataset.to_csv(self.trajectories_path, index=False)
 
     def trips_segmentation(self):
         # reading dataset of a time period
@@ -342,12 +376,12 @@ class Trajectories:
         Save the dataset in a csv file.
         """
         # reading dataset of a time period
-        dataset = pd.read_csv(self.segmentation_path, parse_dates=['time'])
+        dataset = pd.read_csv(self.trajectories_path, parse_dates=['time'])
         dataset['time'] = dataset['time'].astype('datetime64[ns]')
         dataset = dataset.sort_values(by=['mmsi', "time"])
 
         # select mmsi randomly
-        ids = dataset['trips'].unique()
+        ids = dataset['trajectory'].unique()
 
         dataset = normalize(dataset, ['lat', 'lon'])
 
@@ -356,7 +390,7 @@ class Trajectories:
         count_trips = 0
         for id in ids:
             print(f'\t Cleaning trajectory {count_trips} of {len(ids)}')
-            trajectory = dataset[dataset['trips'] == id] #z: collecting all rows with the same id, gives us a trajectory of one vessel
+            trajectory = dataset[dataset['trajectory'] == id] #z: collecting all rows with the same id, gives us a trajectory of one vessel
 
             # selecting the region
             isin_region = True
