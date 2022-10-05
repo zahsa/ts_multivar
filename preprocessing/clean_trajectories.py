@@ -106,6 +106,9 @@ def removing_invalid_samples(x, min_obs=None, subset=None):
     # remove duplicate entries
     x = x.drop_duplicates(subset=subset, keep='first')
 
+    # remove stopped messages
+    x = x[x['sog'] > 0.5]
+
     if min_obs is not None:
         # remove mmsi with less than min observations
         obs_per_mmsi = x.groupby(x['mmsi'], as_index=False).size()
@@ -223,12 +226,12 @@ class Trajectories:
         self.dataset_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{day_name}_time_period.csv"
         self.cleaned_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{day_name}_clean.csv"
         self.trajectories_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{day_name}_traj.csv"
-        self.segmentation_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{day_name}_trips.csv"
-        self.preprocessed_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{self._nsamples}-mmsi_{day_name}_prunning.csv"
+        self.trips_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{day_name}_trips.csv"
+        self.preprocessed_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{self._nsamples}-mmsi_{day_name}_final.csv"
         # self.preprocessed_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{self._nsamples}-mmsi_{day_name}_trips_prune.csv"
 
         if self.region is not None:
-            self.preprocessed_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{self._nsamples}-mmsi_region_{self.region}_{day_name}_prunning.csv"
+            self.preprocessed_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{self._nsamples}-mmsi_region_{self.region}_{day_name}_final.csv"
             # self.preprocessed_path = f"./data/preprocessed/DCAIS_vessels_{self._vt}_{self._nsamples}-mmsi_region_{self.region}_{day_name}_trips_prune.csv"
 
         if not os.path.exists(self.dataset_path):
@@ -249,14 +252,14 @@ class Trajectories:
         else:
             print('path2.1 exists')
 
-        if not os.path.exists(self.segmentation_path):
-            self.trips_segmentation()
-            print(f'Clean data save at: {self.segmentation_path}')
+        if not os.path.exists(self.trips_path):
+            self.trips_preprocessing()
+            print(f'Clean data save at: {self.trips_path}')
         else:
             print('path3 exists')
 
         if not os.path.exists(self.preprocessed_path):
-            self.mmsi_trips_prune()
+            self.select_region()
             print(f'Preprocessed trips data save at: {self.preprocessed_path}')
         else:
             print('path4 exists')
@@ -312,7 +315,7 @@ class Trajectories:
         # save file
         new_dataset.to_csv(self.trajectories_path, index=False)
 
-    def trips_segmentation(self):
+    def trips_preprocessing(self):
         # reading dataset of a time period
         dataset = pd.read_csv(self.cleaned_path, parse_dates=['time'])
         dataset['time'] = dataset['time'].astype('datetime64[ns]')
@@ -366,7 +369,7 @@ class Trajectories:
         new_dataset = time_segmentation(new_dataset)
 
         #save file
-        new_dataset.to_csv(self.segmentation_path, index=False)
+        new_dataset.to_csv(self.trips_path, index=False)
 
 
     def mmsi_trips_prune(self):
@@ -410,6 +413,45 @@ class Trajectories:
                     print(f'\t\ttrajectory {id} is removed')
             # count_mmsi = count_mmsi + 1 #z if one trajectory is removed then the whole information for one vessel is deleted
          
+        self._nsamples = count_trips
+        print(f'{count_trips} remaining')
+
+        new_dataset.to_csv(self.preprocessed_path, index=False)
+
+    def select_region(self):
+        """
+        It reads the DCAIS dataset, select MMSI randomly if a number of samples is defined.
+        It process the trajectories of each MMSI (pandas format).
+        Save the dataset in a csv file.
+        """
+        # reading dataset of a time period
+        dataset = pd.read_csv(self.trips_path, parse_dates=['time'])
+        dataset['time'] = dataset['time'].astype('datetime64[ns]')
+        dataset = dataset.sort_values(by=['mmsi', "time"])
+
+        # select mmsi randomly
+        ids = dataset['trips'].unique()
+
+        new_dataset = pd.DataFrame()
+        # create trajectories
+        count_trips = 0
+        for id in ids:
+            print(f'\t Cleaning trajectory {count_trips} of {len(ids)}')
+            trajectory = dataset[dataset['trips'] == id]
+
+            # selecting the region
+            isin_region = True
+            if self.region is not None:
+                if (trajectory['lat'].between(self.region[0], self.region[1]).sum() == 0) | (
+                        trajectory['lon'].between(self.region[2], self.region[3]).sum() == 0):
+                    isin_region = False
+
+            # if is inside the selected region and contains enough observations
+            if (trajectory.shape[0] >= self.min_obs) and isin_region:
+                # add trajectory
+                new_dataset = pd.concat([new_dataset, trajectory], axis=0, ignore_index=True)
+                count_trips = count_trips + 1
+
         self._nsamples = count_trips
         print(f'{count_trips} remaining')
 

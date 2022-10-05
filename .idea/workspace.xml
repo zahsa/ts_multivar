@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f0eae4f8-0f00-4b3d-882d-2966238b9034" name="Changes" comment="">
+    <list default="true" id="f0eae4f8-0f00-4b3d-882d-2966238b9034" name="Changes" comment="trajectories">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/approach/ar_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/approach/ar_models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/approach/ar_models_cs.py" beforeDir="false" afterPath="$PROJECT_DIR$/approach/ar_models_cs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_var.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_var.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/preprocessing/clean_trajectories.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/clean_trajectories.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -65,7 +67,26 @@
       <recent name="C:\Users\Martha\Documents\project\ts_multivar\results\DCAIS_example\VAR" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python.main_var">
+    <configuration name="errors_boxplot" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ts_multivar" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/errors_boxplot.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ts_multivar" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -92,9 +113,6 @@
       <module name="ts_multivar" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -132,7 +150,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="seg" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="preprocessing" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ts_multivar" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -140,12 +158,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../PosDoc/Stan/CSCI6515_2022/assignment1" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/seg.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../PosDoc/Stan/CSCI6515_2022/assignment1/preprocessing.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -157,15 +175,17 @@
     <list>
       <item itemvalue="Python.main_var" />
       <item itemvalue="Python.pleasure_craft" />
-      <item itemvalue="Python.seg" />
       <item itemvalue="Python.main" />
+      <item itemvalue="Python.preprocessing" />
+      <item itemvalue="Python.errors_boxplot" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.main_var" />
+        <item itemvalue="Python.errors_boxplot" />
+        <item itemvalue="Python.preprocessing" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python.pleasure_craft" />
-        <item itemvalue="Python.seg" />
-        <item itemvalue="Python.main_var" />
       </list>
     </recent_temporary>
   </component>
@@ -222,6 +242,14 @@
       <workItem from="1663240191560" duration="3605000" />
       <workItem from="1663261174239" duration="22000" />
       <workItem from="1663269533620" duration="1832000" />
+      <workItem from="1663866914540" duration="658000" />
+      <workItem from="1663939205111" duration="948000" />
+      <workItem from="1664475484194" duration="6297000" />
+      <workItem from="1664542975286" duration="14000" />
+      <workItem from="1664900664080" duration="2597000" />
+      <workItem from="1664906169483" duration="858000" />
+      <workItem from="1664912103974" duration="601000" />
+      <workItem from="1664990487569" duration="4374000" />
     </task>
     <task id="LOCAL-00001" summary="including normalization into preprocessing and clustering">
       <created>1654625546633</created>
@@ -314,7 +342,14 @@
       <option name="project" value="LOCAL" />
       <updated>1663252379191</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="trajectories">
+      <created>1663866939274</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1663866939274</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -345,20 +380,31 @@
     <MESSAGE value="visualization of the barplots" />
     <MESSAGE value="selected vessel types" />
     <MESSAGE value="uniform time segmentation" />
-    <option name="LAST_COMMIT_MESSAGE" value="uniform time segmentation" />
+    <MESSAGE value="trajectories" />
+    <option name="LAST_COMMIT_MESSAGE" value="trajectories" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/approach/ar_models_cs.py</url>
-          <line>174</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/approach/clustering.py</url>
           <line>343</line>
           <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/main_var.py</url>
+          <line>23</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/approach/ar_models_cs.py</url>
+          <line>128</line>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/approach/ar_models_cs.py</url>
+          <line>176</line>
+          <option name="timeStamp" value="13" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -366,7 +412,8 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ts_multivar$seg.coverage" NAME="seg Coverage Results" MODIFIED="1659031628458" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ts_multivar$main.coverage" NAME="main Coverage Results" MODIFIED="1662647333495" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/ts_multivar$main_var.coverage" NAME="main_var Coverage Results" MODIFIED="1658931924855" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ts_multivar$errors_boxplot.coverage" NAME="errors_boxplot Coverage Results" MODIFIED="1664902062261" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ts_multivar$pleasure_craft.coverage" NAME="pleasure_craft Coverage Results" MODIFIED="1658937322085" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ts_multivar$main_var.coverage" NAME="main_var Coverage Results" MODIFIED="1664482469840" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

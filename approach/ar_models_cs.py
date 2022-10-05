@@ -77,6 +77,10 @@ class Models:
         if 'dim_set' in args.keys():
             self._dim_set = args['dim_set']
 
+        self._var_prm = 2
+        if 'var_prm' in args.keys():
+            self._var_prm = args['var_prm']
+
         self.dataset = dataset
         self._ids = list(self.dataset.keys())
         # self._ids = list(range(len(self.dataset_norm.keys())))
@@ -156,21 +160,19 @@ class Models:
 
         dff = pd.DataFrame.from_dict(self.dataset[self._ids[i]])
 
-        df_features = dff.loc[:, ['lat_norm', 'lon_norm']] #, 'sog', 'cog']]
+        df_features = dff.loc[:, self._dim_set]
 
         print(f'df_feat for feat{i}')
 
         model_var = VAR(df_features)
-        res = model_var.fit(2)
+        res = model_var.fit(self._var_prm)
 
         rp = res.params
-        coef1 = rp.loc[:, "lon_norm"].values
-        coeffs_i = np.hstack((coeffs_i, coef1))
+        for dim in self._dim_set:
+            coef1 = rp.loc[:, dim].values
+            coeffs_i = np.hstack((coeffs_i, coef1))
 
-        coef2 = rp.loc[:, "lat_norm"].values
-        coeffs_i = np.hstack((coeffs_i, coef2))
-
-        print('coef shapes', coef1.shape, coef2.shape)
+        print('coef shapes', coeffs_i.shape)
 
         measure_list = measure_list + [res.aic, res.bic, res.fpe, res.hqic]
 
