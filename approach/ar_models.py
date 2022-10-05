@@ -6,6 +6,7 @@ import os, pickle
 from joblib import Parallel, delayed
 from analysis import projection as pjt
 from approach import OU_process as ou
+from statsmodels.tsa.api import VAR
 from sklearn.preprocessing import MinMaxScaler
 
 
@@ -194,6 +195,64 @@ class Models1:
         # self.dm = squareform(pdist(self.coeffs))
         # self.dm = self.dm / self.dm.max()
 
+    def multi_arima_coefs(self):
+        """
+        It computes multivariate ARIMA model in each trajectory, and produce the distance matrix with Euclidean distance.
+        """
+        measure_pd = {}
+        coeffs = {}
+        for i in range(len(self._ids)):
+            measure_pd[self._ids[i]] = {}
+            coeffs[self._ids[i]] = {}
+
+        Parallel(n_jobs=self.num_cores, require='sharedmem')(
+            delayed(self._multi_arima_func)(i, measure_pd, coeffs) for i in list(range(len(self._ids))))
+
+        measure_pd = pd.DataFrame(measure_pd).T
+        col_names_all = ['AIC', 'BIC', 'MSE', 'MAE', 'SSE', 'HQIC']
+        col_names = ['mmsi']
+        for dim in range(len(self._dim_set)):
+            col_names = col_names + col_names_all
+        measure_pd.columns = col_names
+        self.measures = measure_pd
+
+        coeffs = dict_reorder(coeffs)
+        self.coeffs = np.array([coeffs[item] for item in coeffs.keys()])
+        self.coeffs[np.isnan(self.coeffs)] = 0
+        scaler = MinMaxScaler().fit(self.coeffs)
+        self.coeffs = scaler.transform(self.coeffs)
+        # self.dm = squareform(pdist(self.coeffs))
+        # self.dm = self.dm / self.dm.max()
+
+    def var_coefs(self):
+        """
+        It computes VAR model in each trajectory, and produce the distance matrix with Euclidean distance.
+        """
+        measure_pd = {}
+        coeffs = {}
+        for i in range(len(self._ids)):
+            measure_pd[self._ids[i]] = {}
+            coeffs[self._ids[i]] = {}
+
+        Parallel(n_jobs=self.num_cores, require='sharedmem')(
+            delayed(self._var_func)(i, measure_pd, coeffs) for i in list(range(len(self._ids))))
+
+        measure_pd = pd.DataFrame(measure_pd).T
+        col_names_all = ['AIC', 'BIC', 'HQIC']
+        col_names = ['mmsi']
+        for dim in range(len(self._dim_set)):
+            col_names = col_names + col_names_all
+        measure_pd.columns = col_names
+        self.measures = measure_pd
+
+        coeffs = dict_reorder(coeffs)
+        self.coeffs = np.array([coeffs[item] for item in coeffs.keys()])
+        self.coeffs[np.isnan(self.coeffs)] = 0
+        scaler = MinMaxScaler().fit(self.coeffs)
+        self.coeffs = scaler.transform(self.coeffs)
+        # self.dm = squareform(pdist(self.coeffs))
+        # self.dm = self.dm / self.dm.max()
+
     ### functions to parallelize ###
     def _arima_func(self, i, measure_pd, coeffs):
         """
@@ -207,6 +266,29 @@ class Models1:
             st = self.dataset[self._ids[i]][dim]
             model = sm.tsa.SARIMAX(st, order=(self.ar_prm, self.i_prm, self.ma_prm), trend='c',
                                    enforce_stationarity=False)
+            res = model.fit(disp=False)
+            coeffs_i = np.hstack((coeffs_i, res.params))
+            measure_list = measure_list + [res.aic, res.bic, res.mse, res.mae, res.sse, res.hqic]
+
+        measure_pd[self._ids[i]] = measure_list
+        coeffs[self._ids[i]] = coeffs_i
+
+    def _multi_arima_func(self, i, measure_pd, coeffs):
+        """
+        It computes multi ARIMA model for one trajectory.
+        """
+        coeffs_i = np.array([])
+        if self.verbose:
+            print(f"Computing {i} of {len(self._ids)}")
+        st = {}
+        for dim in self._dim_set:
+            st[dim] = self.dataset[self._ids[i]][dim]
+        df = pd.DataFrame(st)
+        measure_list = [self.dataset[self._ids[i]]['mmsi'][0]]
+
+        for dim in self._dim_set:
+            model = sm.tsa.SARIMAX(df.loc[:, dim], exog=df.loc[:, df.columns != dim], order=(self.ar_prm, self.i_prm, self.ma_prm),
+                               trend='c', enforce_stationarity=False)
             res = model.fit(disp=False)
             coeffs_i = np.hstack((coeffs_i, res.params))
             measure_list = measure_list + [res.aic, res.bic, res.mse, res.mae, res.sse, res.hqic]
@@ -232,11 +314,34 @@ class Models1:
 
         coeffs[self._ids[i]] = coeffs_i
 
+    def _var_func(self, i, measure_pd, coeffs):
+        """
+        It computes VAR model for one trajectory.
+        """
+        measure_list = [self.dataset[self._ids[i]]['mmsi'][0]]
+        if self.verbose:
+            print(f"Computing {i} of {len(self._ids)}")
+        st = {}
+        for dim in self._dim_set:
+            st[dim] = self.dataset[self._ids[i]][dim]
+        df = pd.DataFrame(st)
+
+        model_var = VAR(df)
+        res = model_var.fit(self._var_prm)
+
+        coeffs_i = res.params
+        measure_list = measure_list + [res.aic, res.bic, res.hqic]
+
+        measure_pd[self._ids[i]] = measure_list
+        coeffs[self._ids[i]] = coeffs_i
+
     def create_data_dict(self):
         """
         Dictionary of models options.
         """
         return {'ou': self.ou,
-                'arima': self.arima_coefs}
+                'arima': self.arima_coefs,
+                'multi_arima': self.multi_arima_coefs,
+                'var': self.var_coefs}
 
 
