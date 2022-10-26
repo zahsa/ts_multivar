@@ -49,7 +49,7 @@ def plot_coeffs_traj(x, clusters, folder):
     color_order = ['red', 'orange', 'blue', 'green', 'yellow', 'pink', 'violet', 'maroon', 'wheat', 'yellowgreen',
                    'lime', 'indigo', 'azure', 'olive', 'cyan', 'beige', 'skyblue', 'lavender', 'gold', 'fuchsia', 'purple']
     i=1
-    fig = plt.figure(1)
+    fig = plt.figure()
     # change the fontsize of the xtick and ytick labels and axes
     plt.rc('xtick', labelsize=15)
     plt.rc('ytick', labelsize=15)

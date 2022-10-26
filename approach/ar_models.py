@@ -6,8 +6,10 @@ import os, pickle
 from joblib import Parallel, delayed
 from analysis import projection as pjt
 from approach import OU_process as ou
-from statsmodels.tsa.api import VAR
+from statsmodels.tsa.api import VAR, VARMAX
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import mean_squared_error
+from math import sqrt
 
 
 def dict_reorder(x):
@@ -89,7 +91,7 @@ class Models1:
         self.coeffs = None
         self.measures = None
         # self.num_cores = 2*(multiprocessing.cpu_count()//3)
-        self.num_cores = 3
+        self.num_cores = 15
         if 'njobs' in args.keys():
             self.num_cores = args['njobs']
 
@@ -115,14 +117,14 @@ class Models1:
 
         self.dataset = dataset
         self._ids = list(self.dataset.keys())
-        print(len( self._ids))
+        print(len(self._ids))
 
         # methods parameters
         self.ar_prm = 1
         if 'ar_prm' in args.keys():
             self.ar_prm = args['ar_prm']
 
-        self.ma_prm = 1
+        self.ma_prm = 0
         if 'ma_prm' in args.keys():
             self.ma_prm = args['ma_prm']
 
@@ -130,21 +132,26 @@ class Models1:
         if 'i_prm' in args.keys():
             self.i_prm = args['i_prm']
 
-        _metrics_dict = self.create_data_dict()
-        _metrics_dict[self.features_opt]()
-
         # saving features
         if 'folder' in args.keys():
             self.path = args['folder']
 
+            self.path = f'{self.path}{self.features_opt}'
+
             if not os.path.exists(self.path):
                 os.makedirs(self.path)
 
-            df_features = pd.DataFrame(self.coeffs)
-            df_features.to_csv(f'{self.path}/features_coeffs.csv')
-            if self.features_opt in ['arima', 'arima_multi']:
+            if not os.path.exists(f'{self.path}/features_coeffs.csv'):
+                _metrics_dict = self.create_data_dict()
+                _metrics_dict[self.features_opt]()
+                df_features = pd.DataFrame(self.coeffs)
+                df_features.to_csv(f'{self.path}/features_coeffs.csv')
                 self.measures.to_csv(f'{self.path}/features_measures.csv')
-            pjt.plot_coeffs_traj(self.coeffs, pd.Series(np.zeros(self.coeffs.shape[0])), folder=self.path)
+            else:
+                self.coeffs = pd.read_csv(f'{self.path}/features_coeffs.csv', index_col=[0])
+                self.measures = pd.read_csv(f'{self.path}/features_measures.csv', index_col=[0])
+
+            # pjt.plot_coeffs_traj(self.coeffs, pd.Series(np.zeros(self.coeffs.shape[0])), folder=self.path)
 
             # pickle.dump(self.dm, open(f'{self.path}/features_distance.p', 'wb'))
             # df_features = pd.DataFrame(self.dm)
@@ -164,7 +171,7 @@ class Models1:
         Parallel(n_jobs=self.num_cores, require='sharedmem')(delayed(self._arima_func)(i, measure_pd, coeffs) for i in list(range(len(self._ids))))
 
         measure_pd = pd.DataFrame(measure_pd).T
-        col_names_all = ['AIC', 'BIC', 'MSE', 'MAE', 'SSE', 'HQIC']
+        col_names_all = ['train-MSE', 'train-RMSE', 'AIC', 'BIC']
         col_names = ['mmsi']
         for dim in range(len(self._dim_set)):
             col_names = col_names + col_names_all
@@ -174,8 +181,8 @@ class Models1:
         coeffs = dict_reorder(coeffs)
         self.coeffs = np.array([coeffs[item] for item in coeffs.keys()])
         self.coeffs[np.isnan(self.coeffs)] = 0
-        scaler = MinMaxScaler().fit(self.coeffs)
-        self.coeffs = scaler.transform(self.coeffs)
+        # scaler = MinMaxScaler().fit(self.coeffs)
+        # self.coeffs = scaler.transform(self.coeffs)
         # self.dm = squareform(pdist(self.coeffs))
         # self.dm = self.dm / self.dm.max()
 
@@ -183,15 +190,27 @@ class Models1:
         """
         It computes OU model in each trajectory, and produce the distance matrix with Euclidean distance.
         """
+        measure_pd = {}
         coeffs = {}
         for i in range(len(self._ids)):
+            measure_pd[self._ids[i]] = {}
             coeffs[self._ids[i]] = {}
-        Parallel(n_jobs=self.num_cores, require='sharedmem')(delayed(self._ou_func)(i, coeffs) for i in list(range(len(self._ids))))
+
+        Parallel(n_jobs=self.num_cores, require='sharedmem')(delayed(self._ou_func)(i, measure_pd, coeffs) for i in list(range(len(self._ids))))
+
+        measure_pd = pd.DataFrame(measure_pd).T
+        col_names_all = ['train-MSE', 'train-RMSE', 'AIC', 'BIC']
+        col_names = ['mmsi']
+        for dim in range(len(self._dim_set)):
+            col_names = col_names + col_names_all
+        measure_pd.columns = col_names
+        self.measures = measure_pd
+
         coeffs = dict_reorder(coeffs)
         self.coeffs = np.array([coeffs[item] for item in coeffs.keys()])
-        scaler = MinMaxScaler()
-        scaler.fit(self.coeffs)
-        self.coeffs = scaler.transform(self.coeffs)
+        # scaler = MinMaxScaler()
+        # scaler.fit(self.coeffs)
+        # self.coeffs = scaler.transform(self.coeffs)
         # self.dm = squareform(pdist(self.coeffs))
         # self.dm = self.dm / self.dm.max()
 
@@ -209,7 +228,7 @@ class Models1:
             delayed(self._multi_arima_func)(i, measure_pd, coeffs) for i in list(range(len(self._ids))))
 
         measure_pd = pd.DataFrame(measure_pd).T
-        col_names_all = ['AIC', 'BIC', 'MSE', 'MAE', 'SSE', 'HQIC']
+        col_names_all = ['train-MSE', 'train-RMSE', 'AIC', 'BIC']
         col_names = ['mmsi']
         for dim in range(len(self._dim_set)):
             col_names = col_names + col_names_all
@@ -219,8 +238,8 @@ class Models1:
         coeffs = dict_reorder(coeffs)
         self.coeffs = np.array([coeffs[item] for item in coeffs.keys()])
         self.coeffs[np.isnan(self.coeffs)] = 0
-        scaler = MinMaxScaler().fit(self.coeffs)
-        self.coeffs = scaler.transform(self.coeffs)
+        # scaler = MinMaxScaler().fit(self.coeffs)
+        # self.coeffs = scaler.transform(self.coeffs)
         # self.dm = squareform(pdist(self.coeffs))
         # self.dm = self.dm / self.dm.max()
 
@@ -238,18 +257,49 @@ class Models1:
             delayed(self._var_func)(i, measure_pd, coeffs) for i in list(range(len(self._ids))))
 
         measure_pd = pd.DataFrame(measure_pd).T
-        col_names_all = ['AIC', 'BIC', 'HQIC']
+        col_names_all = ['train-MSE', 'train-RMSE']
         col_names = ['mmsi']
         for dim in range(len(self._dim_set)):
             col_names = col_names + col_names_all
+        col_names = col_names + ['AIC', 'BIC']
         measure_pd.columns = col_names
         self.measures = measure_pd
 
         coeffs = dict_reorder(coeffs)
         self.coeffs = np.array([coeffs[item] for item in coeffs.keys()])
         self.coeffs[np.isnan(self.coeffs)] = 0
-        scaler = MinMaxScaler().fit(self.coeffs)
-        self.coeffs = scaler.transform(self.coeffs)
+        # scaler = MinMaxScaler().fit(self.coeffs)
+        # self.coeffs = scaler.transform(self.coeffs)
+        # self.dm = squareform(pdist(self.coeffs))
+        # self.dm = self.dm / self.dm.max()
+
+    def varmax_coefs(self):
+        """
+        It computes VAR model in each trajectory, and produce the distance matrix with Euclidean distance.
+        """
+        measure_pd = {}
+        coeffs = {}
+        for i in range(len(self._ids)):
+            measure_pd[self._ids[i]] = {}
+            coeffs[self._ids[i]] = {}
+
+        Parallel(n_jobs=self.num_cores, require='sharedmem')(
+            delayed(self._varmax_func)(i, measure_pd, coeffs) for i in list(range(len(self._ids))))
+
+        measure_pd = pd.DataFrame(measure_pd).T
+        col_names_all = ['train-MSE', 'train-RMSE']
+        col_names = ['mmsi']
+        for dim in range(len(self._dim_set)):
+            col_names = col_names + col_names_all
+        col_names = col_names + ['AIC', 'BIC']
+        measure_pd.columns = col_names
+        self.measures = measure_pd
+
+        coeffs = dict_reorder(coeffs)
+        self.coeffs = np.array([coeffs[item] for item in coeffs.keys()])
+        # self.coeffs[np.isnan(self.coeffs)] = 0
+        # scaler = MinMaxScaler().fit(self.coeffs)
+        # self.coeffs = scaler.transform(self.coeffs)
         # self.dm = squareform(pdist(self.coeffs))
         # self.dm = self.dm / self.dm.max()
 
@@ -268,7 +318,13 @@ class Models1:
                                    enforce_stationarity=False)
             res = model.fit(disp=False)
             coeffs_i = np.hstack((coeffs_i, res.params))
-            measure_list = measure_list + [res.aic, res.bic, res.mse, res.mae, res.sse, res.hqic]
+            # measure_list = measure_list + [res.aic, res.bic, res.mse, res.mae, res.sse, res.hqic]
+            pred = res.predict(1, len(st))
+            mse = mean_squared_error(st, pred)
+            rmse = sqrt(mse)
+
+            # measure_list = measure_list + [res.aic, res.bic, res.mse, res.mae, res.sse, res.hqic]
+            measure_list = measure_list + [mse, rmse, res.aic, res.bic]
 
         measure_pd[self._ids[i]] = measure_list
         coeffs[self._ids[i]] = coeffs_i
@@ -291,12 +347,17 @@ class Models1:
                                trend='c', enforce_stationarity=False)
             res = model.fit(disp=False)
             coeffs_i = np.hstack((coeffs_i, res.params))
-            measure_list = measure_list + [res.aic, res.bic, res.mse, res.mae, res.sse, res.hqic]
+            pred = res.predict(1, len(st[dim]), exog=df.loc[0, df.columns != dim])
+            mse = mean_squared_error(st[dim], pred)
+            rmse = sqrt(mse)
+
+            # measure_list = measure_list + [res.aic, res.bic, res.mse, res.mae, res.sse, res.hqic]
+            measure_list = measure_list + [mse, rmse, res.aic, res.bic]
 
         measure_pd[self._ids[i]] = measure_list
         coeffs[self._ids[i]] = coeffs_i
 
-    def _ou_func(self, i, coeffs):
+    def _ou_func(self, i, measure_pd, coeffs):
         """
         It computes OU model for one trajectory.
         """
@@ -305,13 +366,22 @@ class Models1:
             print(f"Computing {i} of {len(self._ids)}")
         st_time = self.dataset[self._ids[i]]['time'].astype('datetime64[s]')
         st_time = np.hstack((0, np.diff(st_time).cumsum().astype('float')))
+        measure_list = [self.dataset[self._ids[i]]['mmsi'][0]]
 
         for dim in self._dim_set:
             st = self.dataset[self._ids[i]][dim]
             st = st.reshape((1, len(st)))
-            res = ou.ou_process(st_time, st)
+            res, aic, bic = ou.ou_process(st_time, st)
             coeffs_i = np.hstack((coeffs_i, res))
 
+            pred = ou.predict(st[0][0], np.arange(0, len(st[0]), 1), res[0], res[1], res[2])
+            mse = mean_squared_error(st[0], pred)
+            rmse = sqrt(mse)
+
+            # measure_list = measure_list + [res.aic, res.bic, res.mse, res.mae, res.sse, res.hqic]
+            measure_list = measure_list + [mse, rmse, aic, bic]
+
+        measure_pd[self._ids[i]] = measure_list
         coeffs[self._ids[i]] = coeffs_i
 
     def _var_func(self, i, measure_pd, coeffs):
@@ -325,12 +395,56 @@ class Models1:
         for dim in self._dim_set:
             st[dim] = self.dataset[self._ids[i]][dim]
         df = pd.DataFrame(st)
-
         model_var = VAR(df)
-        res = model_var.fit(self._var_prm)
+        res = model_var.fit(self.ar_prm)
+        coeffs_i = res.params
+        coeffs_i = coeffs_i.T.values.ravel()
+
+        pred = res.forecast(df.values[0:2], steps=df.shape[0])
+        pred = pd.DataFrame(pred)
+        for dim in range(pred.shape[1]):
+            mse = mean_squared_error(df.iloc[:,dim], pred.iloc[:,dim])
+            rmse = sqrt(mse)
+            # measure_list = measure_list + [res.aic, res.bic, res.hqic]
+            measure_list = measure_list + [mse, rmse]
+        measure_list = measure_list + [res.aic, res.bic]
+
+        measure_pd[self._ids[i]] = measure_list
+        coeffs[self._ids[i]] = coeffs_i
+
+    def _varmax_func(self, i, measure_pd, coeffs):
+        """
+        It computes VARMA model for one trajectory.
+        """
+        measure_list = [self.dataset[self._ids[i]]['mmsi'][0]]
+        if self.verbose:
+            print(f"Computing {i} of {len(self._ids)}")
+        st = {}
+        for dim in self._dim_set:
+            st[dim] = self.dataset[self._ids[i]][dim]
+        df = pd.DataFrame(st)
+        try:
+            model_var = VARMAX(df, order=(self.ar_prm, self.ma_prm))
+            res = model_var.fit(disp=False)
+        except:
+            try:
+                model_var = VARMAX(df, order=(self.ar_prm, self.ma_prm), error_cov_type='diagonal')
+                res = model_var.fit(disp=False)
+            except:
+                model_var = VARMAX(df, order=(self.ar_prm, self.ma_prm), enforce_stationarity=False)
+                res = model_var.fit(disp=False)
 
         coeffs_i = res.params
-        measure_list = measure_list + [res.aic, res.bic, res.hqic]
+
+        pred = res.forecast(df.shape[0])
+        pred = pd.DataFrame(pred)
+        pred = pred.fillna(method='ffill')
+        for dim in range(pred.shape[1]):
+            mse = mean_squared_error(df.iloc[:,dim], pred.iloc[:,dim])
+            rmse = sqrt(mse)
+            # measure_list = measure_list + [res.aic, res.bic, res.hqic]
+            measure_list = measure_list + [mse, rmse]
+        measure_list = measure_list + [res.aic, res.bic]
 
         measure_pd[self._ids[i]] = measure_list
         coeffs[self._ids[i]] = coeffs_i
@@ -342,6 +456,7 @@ class Models1:
         return {'ou': self.ou,
                 'arima': self.arima_coefs,
                 'multi_arima': self.multi_arima_coefs,
-                'var': self.var_coefs}
+                'var': self.var_coefs,
+                'varmax': self.varmax_coefs}
 
 

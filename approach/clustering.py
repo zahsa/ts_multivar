@@ -1,5 +1,4 @@
 from sklearn.cluster import DBSCAN, SpectralClustering, AgglomerativeClustering
-import hdbscan
 import os, pickle
 import numpy as np
 import matplotlib.pyplot as plt
@@ -80,28 +79,6 @@ def my_spectral(data, **args):
     clustering.fit(data)
 
     return clustering
-
-
-def my_hdbscan(data, ** args):
-    """
-    It generates the hdbscan clustering
-    :param data: the distance matrix
-    :return: the labels
-    """
-    min_cluster_size = 7
-    if 'min_cluster_size' in args.keys():
-        min_cluster_size = args['min_cluster_size']
-
-    min_samples = 3
-    if 'min_samples' in args.keys():
-        min_samples = args['min_samples']
-
-
-    clustering = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples)
-    labels = clustering.fit_predict(data)
-
-    return labels
-
 
 def plot_dendrogram(dm, folder):
     """

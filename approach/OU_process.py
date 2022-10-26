@@ -2,6 +2,17 @@ import numpy as np
 import math
 import scipy
 
+
+def aic_fuc(L, K):
+    # L is the maximum likelihood (log-likelihood)
+    return 2 * K - 2 * L
+
+
+def bic_fuc(L, K, n):
+    # L is the maximum likelihood (log-likelihood)
+    return K * np.log(n) - 2 * L
+
+
 def ou_process(t, x, start=None):
     """ OU (Ornstein-Uhlenbeck) process
         dX = -A(X-alpha)dt + v dB
@@ -21,7 +32,13 @@ def ou_process(t, x, start=None):
     result = scipy.optimize.minimize(error_fuc, start, method='L-BFGS-B',
                                      bounds=[(1e-6, None), (None, None), (1e-8, None)],
                                      options={'maxiter': 500, 'disp': False})
-    return result.x
+    L = error_fuc(result.x)
+    k = len(result.x)
+    n = x.shape[1]
+
+    aic = aic_fuc(L, k)
+    bic = bic_fuc(L, k, n)
+    return result.x, aic, bic
 
 
 def est_v_quadratic_variation(t, x, weights=None):
@@ -62,3 +79,15 @@ def variance(t, mean_rev_speed, vola):
     assert vola >= 0
     return vola * vola * (1.0 - np.exp(- 2.0 * mean_rev_speed * t)) / (2 * mean_rev_speed)
 
+
+def predict(x0, t, mean_rev_speed, mean_rev_level, vola):
+    """ Simulates a sample path"""
+    assert len(t) > 1
+    x = scipy.stats.norm.rvs(size=len(t))
+    x[0] = x0
+    dt = np.diff(t)
+    scale = std(dt, mean_rev_speed, vola)
+    x[1:] = x[1:] * scale
+    for i in range(1, len(x)):
+        x[i] += mean(x[i - 1], dt[i - 1], mean_rev_speed, mean_rev_level)
+    return x
