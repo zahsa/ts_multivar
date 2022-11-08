@@ -6,7 +6,9 @@ import os, pickle
 from joblib import Parallel, delayed
 from analysis import projection as pjt
 from approach import OU_process as ou
-from statsmodels.tsa.api import VAR, VARMAX
+# from statsmodels.tsa.api import VAR, VARMAX
+from statsmodels.tsa.statespace.varmax import VARMAX
+from statsmodels.tsa.vector_ar.var_model import VAR
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 from math import sqrt
@@ -132,11 +134,20 @@ class Models1:
         if 'i_prm' in args.keys():
             self.i_prm = args['i_prm']
 
+        self._trend = 'n'
+        if 'trend' in args.keys():
+            self._trend = args['trend']
+
+        params_name = f'ar_{self.ar_prm}_ma_{self.ma_prm}_i_{self.i_prm}_t_{self._trend}'
+
         # saving features
         if 'folder' in args.keys():
             self.path = args['folder']
 
-            self.path = f'{self.path}{self.features_opt}'
+            if self.features_opt in ['ou']:
+                self.path = f'{self.path}{self.features_opt}'
+            else:
+                self.path = f'{self.path}{self.features_opt}/{params_name}/'
 
             if not os.path.exists(self.path):
                 os.makedirs(self.path)
@@ -314,12 +325,14 @@ class Models1:
             print(f"Computing {i} of {len(self._ids)}")
         for dim in self._dim_set:
             st = self.dataset[self._ids[i]][dim]
-            model = sm.tsa.SARIMAX(st, order=(self.ar_prm, self.i_prm, self.ma_prm), trend='c',
+            model = sm.tsa.SARIMAX(st, order=(self.ar_prm, self.i_prm, self.ma_prm), trend=self._trend,
                                    enforce_stationarity=False)
             res = model.fit(disp=False)
             coeffs_i = np.hstack((coeffs_i, res.params))
             # measure_list = measure_list + [res.aic, res.bic, res.mse, res.mae, res.sse, res.hqic]
             pred = res.predict(1, len(st))
+            pred = pd.DataFrame(pred)
+            pred = pred.fillna(method='ffill')
             mse = mean_squared_error(st, pred)
             rmse = sqrt(mse)
 
@@ -344,10 +357,12 @@ class Models1:
 
         for dim in self._dim_set:
             model = sm.tsa.SARIMAX(df.loc[:, dim], exog=df.loc[:, df.columns != dim], order=(self.ar_prm, self.i_prm, self.ma_prm),
-                               trend='c', enforce_stationarity=False)
+                               trend=self._trend, enforce_stationarity=False)
             res = model.fit(disp=False)
             coeffs_i = np.hstack((coeffs_i, res.params))
             pred = res.predict(1, len(st[dim]), exog=df.loc[0, df.columns != dim])
+            pred = pd.DataFrame(pred)
+            pred = pred.fillna(method='ffill')
             mse = mean_squared_error(st[dim], pred)
             rmse = sqrt(mse)
 
@@ -396,11 +411,11 @@ class Models1:
             st[dim] = self.dataset[self._ids[i]][dim]
         df = pd.DataFrame(st)
         model_var = VAR(df)
-        res = model_var.fit(self.ar_prm)
+        res = model_var.fit(self.ar_prm, trend=self._trend)
         coeffs_i = res.params
         coeffs_i = coeffs_i.T.values.ravel()
 
-        pred = res.forecast(df.values[0:2], steps=df.shape[0])
+        pred = res.forecast(df.values[0:self.ar_prm], steps=df.shape[0])
         pred = pd.DataFrame(pred)
         for dim in range(pred.shape[1]):
             mse = mean_squared_error(df.iloc[:,dim], pred.iloc[:,dim])
@@ -423,18 +438,20 @@ class Models1:
         for dim in self._dim_set:
             st[dim] = self.dataset[self._ids[i]][dim]
         df = pd.DataFrame(st)
+        if i == 342:
+            print('bla')
         try:
-            model_var = VARMAX(df, order=(self.ar_prm, self.ma_prm))
+            model_var = VARMAX(df, order=(self.ar_prm, self.ma_prm), trend=self._trend)
             res = model_var.fit(disp=False)
         except:
             try:
-                model_var = VARMAX(df, order=(self.ar_prm, self.ma_prm), error_cov_type='diagonal')
+                model_var = VARMAX(df, order=(self.ar_prm, self.ma_prm), trend=self._trend, error_cov_type='diagonal')
                 res = model_var.fit(disp=False)
             except:
-                model_var = VARMAX(df, order=(self.ar_prm, self.ma_prm), enforce_stationarity=False)
+                model_var = VARMAX(df, order=(self.ar_prm, self.ma_prm), trend=self._trend, enforce_stationarity=False)
                 res = model_var.fit(disp=False)
 
-        coeffs_i = res.params
+        coeffs_i = pd.DataFrame.from_dict(res.params).T.values.ravel()
 
         pred = res.forecast(df.shape[0])
         pred = pd.DataFrame(pred)
