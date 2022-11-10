@@ -6,7 +6,6 @@ import os, pickle
 from joblib import Parallel, delayed
 from analysis import projection as pjt
 from approach import OU_process as ou
-# from statsmodels.tsa.api import VAR, VARMAX
 from statsmodels.tsa.statespace.varmax import VARMAX
 from statsmodels.tsa.vector_ar.var_model import VAR
 from sklearn.preprocessing import MinMaxScaler
@@ -119,7 +118,6 @@ class Models1:
 
         self.dataset = dataset
         self._ids = list(self.dataset.keys())
-        print(len(self._ids))
 
         # methods parameters
         self.ar_prm = 1
@@ -153,11 +151,14 @@ class Models1:
                 os.makedirs(self.path)
 
             if not os.path.exists(f'{self.path}/features_coeffs.csv'):
-                _metrics_dict = self.create_data_dict()
-                _metrics_dict[self.features_opt]()
-                df_features = pd.DataFrame(self.coeffs)
-                df_features.to_csv(f'{self.path}/features_coeffs.csv')
-                self.measures.to_csv(f'{self.path}/features_measures.csv')
+                if os.path.exists(f'{self.path}'):
+                    print(f'Already give error for {self.features_opt} - {params_name}')
+                else:
+                    _metrics_dict = self.create_data_dict()
+                    _metrics_dict[self.features_opt]()
+                    df_features = pd.DataFrame(self.coeffs)
+                    df_features.to_csv(f'{self.path}/features_coeffs.csv')
+                    self.measures.to_csv(f'{self.path}/features_measures.csv')
             else:
                 self.coeffs = pd.read_csv(f'{self.path}/features_coeffs.csv', index_col=[0])
                 self.measures = pd.read_csv(f'{self.path}/features_measures.csv', index_col=[0])
@@ -438,8 +439,6 @@ class Models1:
         for dim in self._dim_set:
             st[dim] = self.dataset[self._ids[i]][dim]
         df = pd.DataFrame(st)
-        if i == 342:
-            print('bla')
         try:
             model_var = VARMAX(df, order=(self.ar_prm, self.ma_prm), trend=self._trend)
             res = model_var.fit(disp=False)

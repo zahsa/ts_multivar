@@ -1,10 +1,6 @@
-from preprocessing.clean_trajectories import Trajectories
 from preprocessing import read_data as rd
 from approach.ar_models import Models1
-from approach.clustering import Clustering
-from datetime import datetime
 import pandas as pd
-import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
@@ -12,54 +8,36 @@ import os
 import plotly.graph_objects as go
 
 
-
-def get_box_plot_data(labels, data):
-    rows_list = []
-
-    for i in range(len(labels)):
-        dict1 = {}
-        dict1['label'] = labels[i]
-        dict1['lower_quartile'] = data[labels[i]].quantile(0.25)
-        dict1['median'] = data[labels[i]].median()
-        dict1['upper_quartile'] = data[labels[i]].quantile(0.75)
-        dict1['mean'] = data[labels[i]].mean(axis=0)
-        dict1['std'] = data[labels[i]].std(axis=0)
-        rows_list.append(dict1)
-
-    return pd.DataFrame(rows_list)
-
-
 def boxplot_model(data, measure='AIC', model='arima', folder='./images/'):
     dim = 'Latitude and Longitude'
 
     x = pd.DataFrame()
     for i in data.keys():
-        if 'AIC.1' in data[i].keys():
-            x = pd.concat([x, (data[i][measure]+data[i]['AIC.1'])/2], axis=1)
+        data[i][measure] = data[i][measure][data[i][measure] < 1e4]
+        if f'{measure}.1' in data[i].keys():
+            data[i][f'{measure}.1'] = data[i][f'{measure}.1'][data[i][f'{measure}.1'] < 1e4]
+            x = pd.concat([x, (data[i][measure]+data[i][f'{measure}.1'])/2], axis=1)
         else:
             x = pd.concat([x, data[i][measure]], axis=1)
 
     x.columns = data.keys()
     x = x.replace([np.inf], np.nan)
     x = x.replace([np.nan], x.max().max())
-
-    print(f'{measure}_{dim}:')
-    print(f'{pd.concat([x.mean(), x.std()], axis=1)}')
+    x = x.iloc[0:100, :]
+    print(x.shape)
 
     # Plot
     fig = go.Figure()
     for i in x.columns:
         fig.add_trace(go.Violin(y=x[i],
                             name=i))
-    fig.update_traces(box_visible=True, meanline_visible=True)
-    fig.update_layout(title_text=model)
-    fig.show()
+    fig.update_traces(box_visible=True, meanline_visible=True, showlegend=False)
+    fig.update_layout(title_text=model, width=1000, height=700)
+    # fig.show()
+    fig.write_image(f'{folder}/features_{measure}_{dim}_{model}.png', scale=1)
 
-    # plt.savefig(f'{folder}/features_{dim}.png', bbox_inches='tight')
-    # plt.close()
-
-    all_stats = get_box_plot_data(x.columns, x)
-    all_stats.to_csv(f'{folder}/{measure}_{dim}_stats.csv')
+    table = pd.concat([x.mean(), x.std(), x.max(), x.min(), x.quantile(0.25), x.median(), x.quantile(0.75)], axis=1)
+    table.to_csv(f'{folder}/{measure}_{dim}_stats.csv')
 
 
 def boxplot_all(data, measure='AIC', folder='./images/'):
@@ -69,8 +47,10 @@ def boxplot_all(data, measure='AIC', folder='./images/'):
     col = {}
 
     for i in data.keys():
-        if 'AIC.1' in data[i].keys():
-            x = pd.concat([x, (data[i][measure]+data[i]['AIC.1'])/2], axis=1)
+        data[i][measure] = data[i][measure][data[i][measure] < 1e4]
+        if f'{measure}.1' in data[i].keys():
+            data[i][f'{measure}.1'] = data[i][f'{measure}.1'][data[i][f'{measure}.1'] < 1e4]
+            x = pd.concat([x, (data[i][measure]+data[i][f'{measure}.1'])/2], axis=1)
             if 'ou' in i:
                 col[i] = 'orange'
             elif 'multi_arima' in i:
@@ -87,33 +67,32 @@ def boxplot_all(data, measure='AIC', folder='./images/'):
     x.columns = data.keys()
     x = x.replace([np.inf], np.nan)
     x = x.replace([np.nan], x.max().max())
-
-    print(f'{measure}_{dim}:')
-    print(f'{pd.concat([x.mean(), x.std()], axis=1)}')
-
+    x = x.iloc[0:100, :]
+    print(x.shape)
     # Plot
+
     fig = go.Figure()
     for i in x.columns:
         fig.add_trace(go.Violin(y=x[i],
                             name=i,
                             line_color=col[i]))
     fig.update_traces(box_visible=True, meanline_visible=True)
-    fig.show()
+    fig.update_layout(width=1300, height=1000)
+    # fig.show()
+    fig.write_image(f'{folder}/features_{measure}_{dim}_all.png', scale=3)
 
-    # plt.savefig(f'{folder}/features_{dim}.png', bbox_inches='tight')
-    # plt.close()
-
-    all_stats = get_box_plot_data(x.columns, x)
-    all_stats.to_csv(f'{folder}/{measure}_{dim}_stats.csv')
+    table = pd.concat([x.mean(), x.std(), x.max(), x.min(), x.quantile(0.25), x.median(), x.quantile(0.75)], axis=1)
+    table.columns = ['mean', 'std', 'max', 'min', 'quart25', 'median', 'quart75']
+    table.to_csv(f'{folder}/{measure}_{dim}_stats.csv')
 
 
-# TODO: read file from precomputed dataset to make it easy to run
 # Fishing type
 vessel_type = [80]
 # Attributes
 dim_set = ['lat', 'lon']
+measure = 'AIC'
 
-#2021
+# 2021
 data_path = f'./data/DCAIS_{vessel_type}_region_[47.5, 49.3, -125.5, -122.5]_01-03_to_30-05_trips.csv'
 file_name = os.path.basename(data_path)
 file_name = os.path.splitext(file_name)[0]
@@ -130,7 +109,6 @@ dataset_dict = rd.get_raw_dataset(data_path, samples=300)
 # features4 = Models1(dataset=dataset_dict, features_opt='var', dim_set=dim_set, folder='./results/DCAIS_example/')
 # features5 = Models1(dataset=dataset_dict, features_opt='varmax', dim_set=dim_set, folder='./results/DCAIS_example/')
 
-#TODO: test experiments and barplots
 main_folder = f'./results/{file_name}/'
 if not os.path.exists(main_folder):
     os.makedirs(main_folder)
@@ -141,7 +119,7 @@ features = Models1(dataset=dataset_dict, features_opt='ou', dim_set=dim_set, fol
 file_path = f'{features.path}/features_measures.csv'
 curr_config_ou['ou'] = pd.read_csv(file_path)
 curr_config['ou'] = pd.read_csv(file_path)
-boxplot_model(curr_config_ou, model='ou', folder=main_folder)
+boxplot_model(curr_config_ou, model='ou', measure=measure, folder=main_folder)
 
 print('ARIMA')
 curr_config_arima = {}
@@ -152,7 +130,7 @@ for ar_p in [1, 2, 3]:
             file_path = f'{features.path}/features_measures.csv'
             curr_config_arima[f'{ar_p}_{ma_p}_{tr}'] = pd.read_csv(file_path)
             curr_config[f'arima_{ar_p}_{ma_p}_{tr}'] = pd.read_csv(file_path)
-boxplot_model(curr_config_arima, model='arima', folder=main_folder)
+boxplot_model(curr_config_arima, model='arima', measure=measure, folder=main_folder)
 
 print('VAR')
 curr_config_var = {}
@@ -165,7 +143,7 @@ for ar_p in [1, 2, 3]:
             curr_config[f'var_{ar_p}_{tr}'] = pd.read_csv(file_path)
         except:
             print(f'Error when running: var_{ar_p}_{tr}')
-boxplot_model(curr_config_var, model='var', folder=main_folder)
+boxplot_model(curr_config_var, model='var', measure=measure, folder=main_folder)
 
 print('MULTIARIMA')
 curr_config_multiarima = {}
@@ -179,8 +157,9 @@ for ar_p in [1, 2, 3]:
                 curr_config[f'multi_arima_{ar_p}_{ma_p}_{tr}'] = pd.read_csv(file_path)
             except:
                 print(f'Error when running: multi_arima_{ar_p}_{ma_p}_{tr}')
-boxplot_model(curr_config_multiarima, model='multi_arima', folder=main_folder)
+boxplot_model(curr_config_multiarima, model='multi_arima', measure=measure, folder=main_folder)
 
+#TODO: still requires tets
 print('VARMAX')
 curr_config_varma = {}
 for ar_p in [1, 2]:
@@ -193,8 +172,8 @@ for ar_p in [1, 2]:
                 curr_config[f'varma_{ar_p}_{ma_p}_{tr}'] = pd.read_csv(file_path)
             except:
                 print(f'Error when running: multi_arima_{ar_p}_{ma_p}_{tr}')
-boxplot_model(curr_config_varma, model='varmax', folder=main_folder)
+boxplot_model(curr_config_varma, model='varmax', measure=measure, folder=main_folder)
 
-boxplot_all(curr_config, folder=main_folder)
+boxplot_all(curr_config, measure=measure, folder=main_folder)
 
 
