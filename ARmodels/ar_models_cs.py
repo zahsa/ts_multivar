@@ -10,7 +10,7 @@ from joblib import Parallel, delayed
 # import projection as pjt
 from analysis import projection as pjt
 
-# from approach import OU_process as ou
+# from ARmodels import OU_process as ou
 from sklearn.preprocessing import MinMaxScaler
 import warnings
 from statsmodels.tsa.stattools import adfuller

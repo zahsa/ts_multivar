@@ -13,7 +13,7 @@ def bic_fuc(L, K, n):
     return K * np.log(n) - 2 * L
 
 
-def ou_process(t, x, start=None):
+def ou_process(t, x, optimizer='L-BFGS-B', start=None):
     """ OU (Ornstein-Uhlenbeck) process
         dX = -A(X-alpha)dt + v dB
         Maximum-likelihood estimator
@@ -29,7 +29,7 @@ def ou_process(t, x, start=None):
         return -loglik(t, x, theta[0], theta[1], theta[2])
 
     start = np.array(start)
-    result = scipy.optimize.minimize(error_fuc, start, method='L-BFGS-B',
+    result = scipy.optimize.minimize(error_fuc, start, method=optimizer,
                                      bounds=[(1e-6, None), (None, None), (1e-8, None)],
                                      options={'maxiter': 500, 'disp': False})
     L = error_fuc(result.x)
@@ -66,6 +66,7 @@ def loglik(t, x, mean_rev_speed, mean_rev_level, vola):
 
 
 def mean(x0, t, mean_rev_speed, mean_rev_level):
+    # print(mean_rev_speed)
     assert mean_rev_speed >= 0
     return x0 * np.exp(-mean_rev_speed * t) + (1.0 - np.exp(- mean_rev_speed * t)) * mean_rev_level
 

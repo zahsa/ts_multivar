@@ -1,7 +1,7 @@
 from preprocessing.clean_trajectories import Trajectories
-from approach.ar_models_cs import Models
-from approach.ar_models import Models1
-from approach.clustering import Clustering
+from ARmodels.ar_models_cs import Models
+from ARmodels.ar_models import Models1
+from ARmodels.clustering import Clustering
 from datetime import datetime
 import os
 import pandas as pd

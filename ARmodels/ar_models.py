@@ -1,16 +1,18 @@
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-from scipy.spatial.distance import pdist, squareform
-import os, pickle
+import os
 from joblib import Parallel, delayed
-from analysis import projection as pjt
-from approach import OU_process as ou
+from ARmodels import OU_process as ou
 from statsmodels.tsa.statespace.varmax import VARMAX
 from statsmodels.tsa.vector_ar.var_model import VAR
-from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 from math import sqrt
+import time
+
+import warnings
+warnings.filterwarnings('ignore')
+warnings.simplefilter('ignore')
 
 
 def dict_reorder(x):
@@ -91,8 +93,8 @@ class Models1:
         self.dm = None
         self.coeffs = None
         self.measures = None
-        # self.num_cores = 2*(multiprocessing.cpu_count()//3)
-        self.num_cores = 15
+        self.processing_time = None
+        self.num_cores = 1
         if 'njobs' in args.keys():
             self.num_cores = args['njobs']
 
@@ -112,9 +114,11 @@ class Models1:
         if 'centralize' in args.keys():
             self._centralize = args['centralize']
 
-        self._normalizationGeo = True
+        self._normalizationGeo = False
         if 'norm_geo' in args.keys():
             self._normalizationGeo = args['norm_geo']
+
+        dataset = normalize(dataset, ['lat', 'lon'], verbose=False, znorm=self._znorm, centralize=self._centralize, norm_geo=self._normalizationGeo)
 
         self.dataset = dataset
         self._ids = list(self.dataset.keys())
@@ -136,6 +140,11 @@ class Models1:
         if 'trend' in args.keys():
             self._trend = args['trend']
 
+        self._optimizer = 'L-BFGS-B'
+        if 'optimizer' in args.keys():
+            self._optimizer = args['optimizer']
+
+
         params_name = f'ar_{self.ar_prm}_ma_{self.ma_prm}_i_{self.i_prm}_t_{self._trend}'
 
         # saving features
@@ -143,12 +152,9 @@ class Models1:
             self.path = args['folder']
 
             if self.features_opt in ['ou']:
-                self.path = f'{self.path}{self.features_opt}'
+                self.path = f'{self.path}{self.features_opt}/ou_{self._optimizer}/'
             else:
                 self.path = f'{self.path}{self.features_opt}/{params_name}/'
-
-            if not os.path.exists(self.path):
-                os.makedirs(self.path)
 
             if not os.path.exists(f'{self.path}/features_coeffs.csv'):
                 if os.path.exists(f'{self.path}'):
@@ -156,9 +162,12 @@ class Models1:
                 else:
                     _metrics_dict = self.create_data_dict()
                     _metrics_dict[self.features_opt]()
+                    os.makedirs(self.path)
                     df_features = pd.DataFrame(self.coeffs)
                     df_features.to_csv(f'{self.path}/features_coeffs.csv')
                     self.measures.to_csv(f'{self.path}/features_measures.csv')
+                    df_processing_time = pd.DataFrame(self.processing_time)
+                    df_processing_time.to_csv(f'{self.path}/features_processing_time.csv')
             else:
                 self.coeffs = pd.read_csv(f'{self.path}/features_coeffs.csv', index_col=[0])
                 self.measures = pd.read_csv(f'{self.path}/features_measures.csv', index_col=[0])
@@ -176,19 +185,22 @@ class Models1:
         """
         measure_pd = {}
         coeffs = {}
+        process_time = {}
         for i in range(len(self._ids)):
             measure_pd[self._ids[i]] = {}
             coeffs[self._ids[i]] = {}
+            process_time[self._ids[i]] = {}
 
-        Parallel(n_jobs=self.num_cores, require='sharedmem')(delayed(self._arima_func)(i, measure_pd, coeffs) for i in list(range(len(self._ids))))
+        Parallel(n_jobs=self.num_cores, require='sharedmem')(delayed(self._arima_func)(i, measure_pd, coeffs, process_time) for i in list(range(len(self._ids))))
 
         measure_pd = pd.DataFrame(measure_pd).T
-        col_names_all = ['train-MSE', 'train-RMSE', 'AIC', 'BIC']
+        col_names_all = ['AIC', 'BIC']
         col_names = ['mmsi']
         for dim in range(len(self._dim_set)):
             col_names = col_names + col_names_all
         measure_pd.columns = col_names
         self.measures = measure_pd
+        self.processing_time = process_time
 
         coeffs = dict_reorder(coeffs)
         self.coeffs = np.array([coeffs[item] for item in coeffs.keys()])
@@ -204,19 +216,22 @@ class Models1:
         """
         measure_pd = {}
         coeffs = {}
+        process_time = {}
         for i in range(len(self._ids)):
             measure_pd[self._ids[i]] = {}
             coeffs[self._ids[i]] = {}
+            process_time[self._ids[i]] = {}
 
-        Parallel(n_jobs=self.num_cores, require='sharedmem')(delayed(self._ou_func)(i, measure_pd, coeffs) for i in list(range(len(self._ids))))
+        Parallel(n_jobs=self.num_cores, require='sharedmem')(delayed(self._ou_func)(i, measure_pd, coeffs, process_time) for i in list(range(len(self._ids))))
 
         measure_pd = pd.DataFrame(measure_pd).T
-        col_names_all = ['train-MSE', 'train-RMSE', 'AIC', 'BIC']
+        col_names_all = ['AIC', 'BIC']
         col_names = ['mmsi']
         for dim in range(len(self._dim_set)):
             col_names = col_names + col_names_all
         measure_pd.columns = col_names
         self.measures = measure_pd
+        self.processing_time = process_time
 
         coeffs = dict_reorder(coeffs)
         self.coeffs = np.array([coeffs[item] for item in coeffs.keys()])
@@ -232,20 +247,23 @@ class Models1:
         """
         measure_pd = {}
         coeffs = {}
+        process_time = {}
         for i in range(len(self._ids)):
             measure_pd[self._ids[i]] = {}
             coeffs[self._ids[i]] = {}
+            process_time[self._ids[i]] = {}
 
         Parallel(n_jobs=self.num_cores, require='sharedmem')(
-            delayed(self._multi_arima_func)(i, measure_pd, coeffs) for i in list(range(len(self._ids))))
+            delayed(self._multi_arima_func)(i, measure_pd, coeffs, process_time) for i in list(range(len(self._ids))))
 
         measure_pd = pd.DataFrame(measure_pd).T
-        col_names_all = ['train-MSE', 'train-RMSE', 'AIC', 'BIC']
+        col_names_all = ['AIC', 'BIC']
         col_names = ['mmsi']
         for dim in range(len(self._dim_set)):
             col_names = col_names + col_names_all
         measure_pd.columns = col_names
         self.measures = measure_pd
+        self.processing_time = process_time
 
         coeffs = dict_reorder(coeffs)
         self.coeffs = np.array([coeffs[item] for item in coeffs.keys()])
@@ -261,21 +279,21 @@ class Models1:
         """
         measure_pd = {}
         coeffs = {}
+        process_time = {}
         for i in range(len(self._ids)):
             measure_pd[self._ids[i]] = {}
             coeffs[self._ids[i]] = {}
+            process_time[self._ids[i]] = {}
 
         Parallel(n_jobs=self.num_cores, require='sharedmem')(
-            delayed(self._var_func)(i, measure_pd, coeffs) for i in list(range(len(self._ids))))
+            delayed(self._var_func)(i, measure_pd, coeffs, process_time) for i in list(range(len(self._ids))))
 
         measure_pd = pd.DataFrame(measure_pd).T
-        col_names_all = ['train-MSE', 'train-RMSE']
         col_names = ['mmsi']
-        for dim in range(len(self._dim_set)):
-            col_names = col_names + col_names_all
         col_names = col_names + ['AIC', 'BIC']
         measure_pd.columns = col_names
         self.measures = measure_pd
+        self.processing_time = process_time
 
         coeffs = dict_reorder(coeffs)
         self.coeffs = np.array([coeffs[item] for item in coeffs.keys()])
@@ -291,21 +309,21 @@ class Models1:
         """
         measure_pd = {}
         coeffs = {}
+        process_time = {}
         for i in range(len(self._ids)):
             measure_pd[self._ids[i]] = {}
             coeffs[self._ids[i]] = {}
+            process_time[self._ids[i]] = {}
 
         Parallel(n_jobs=self.num_cores, require='sharedmem')(
-            delayed(self._varmax_func)(i, measure_pd, coeffs) for i in list(range(len(self._ids))))
+            delayed(self._varmax_func)(i, measure_pd, coeffs, process_time) for i in list(range(len(self._ids))))
 
         measure_pd = pd.DataFrame(measure_pd).T
-        col_names_all = ['train-MSE', 'train-RMSE']
         col_names = ['mmsi']
-        for dim in range(len(self._dim_set)):
-            col_names = col_names + col_names_all
         col_names = col_names + ['AIC', 'BIC']
         measure_pd.columns = col_names
         self.measures = measure_pd
+        self.processing_time = process_time
 
         coeffs = dict_reorder(coeffs)
         self.coeffs = np.array([coeffs[item] for item in coeffs.keys()])
@@ -316,11 +334,12 @@ class Models1:
         # self.dm = self.dm / self.dm.max()
 
     ### functions to parallelize ###
-    def _arima_func(self, i, measure_pd, coeffs):
+    def _arima_func(self, i, measure_pd, coeffs, process_time):
         """
         It computes ARIMA model for one trajectory.
         """
-        coeffs_i = np.array([])
+        t0 = time.time()
+        coeffs_i = np.array([self._ids[i]])
         measure_list = [self.dataset[self._ids[i]]['mmsi'][0]]
         if self.verbose:
             print(f"Computing {i} of {len(self._ids)}")
@@ -330,24 +349,22 @@ class Models1:
                                    enforce_stationarity=False)
             res = model.fit(disp=False)
             coeffs_i = np.hstack((coeffs_i, res.params))
-            # measure_list = measure_list + [res.aic, res.bic, res.mse, res.mae, res.sse, res.hqic]
-            pred = res.predict(1, len(st))
-            pred = pd.DataFrame(pred)
-            pred = pred.fillna(method='ffill')
-            mse = mean_squared_error(st, pred)
-            rmse = sqrt(mse)
 
-            # measure_list = measure_list + [res.aic, res.bic, res.mse, res.mae, res.sse, res.hqic]
-            measure_list = measure_list + [mse, rmse, res.aic, res.bic]
+            measure_list = measure_list + [res.aic, res.bic]
 
         measure_pd[self._ids[i]] = measure_list
         coeffs[self._ids[i]] = coeffs_i
+        t1 = time.time() - t0
+        process_time[self._ids[i]] = {}
+        process_time[self._ids[i]]['time'] = t1
+        process_time[self._ids[i]]['lenght'] = self.dataset[self._ids[i]][self._dim_set[0]].shape[0]
 
-    def _multi_arima_func(self, i, measure_pd, coeffs):
+    def _multi_arima_func(self, i, measure_pd, coeffs, process_time):
         """
         It computes multi ARIMA model for one trajectory.
         """
-        coeffs_i = np.array([])
+        t0 = time.time()
+        coeffs_i = np.array([self._ids[i]])
         if self.verbose:
             print(f"Computing {i} of {len(self._ids)}")
         st = {}
@@ -361,23 +378,22 @@ class Models1:
                                trend=self._trend, enforce_stationarity=False)
             res = model.fit(disp=False)
             coeffs_i = np.hstack((coeffs_i, res.params))
-            pred = res.predict(1, len(st[dim]), exog=df.loc[0, df.columns != dim])
-            pred = pd.DataFrame(pred)
-            pred = pred.fillna(method='ffill')
-            mse = mean_squared_error(st[dim], pred)
-            rmse = sqrt(mse)
 
-            # measure_list = measure_list + [res.aic, res.bic, res.mse, res.mae, res.sse, res.hqic]
-            measure_list = measure_list + [mse, rmse, res.aic, res.bic]
+            measure_list = measure_list + [res.aic, res.bic]
 
         measure_pd[self._ids[i]] = measure_list
         coeffs[self._ids[i]] = coeffs_i
+        t1 = time.time() - t0
+        process_time[self._ids[i]] = {}
+        process_time[self._ids[i]]['time'] = t1
+        process_time[self._ids[i]]['lenght'] = self.dataset[self._ids[i]][self._dim_set[0]].shape[0]
 
-    def _ou_func(self, i, measure_pd, coeffs):
+    def _ou_func(self, i, measure_pd, coeffs, process_time):
         """
         It computes OU model for one trajectory.
         """
-        coeffs_i = np.array([])
+        t0 = time.time()
+        coeffs_i = np.array([self._ids[i]])
         if self.verbose:
             print(f"Computing {i} of {len(self._ids)}")
         st_time = self.dataset[self._ids[i]]['time'].astype('datetime64[s]')
@@ -387,23 +403,24 @@ class Models1:
         for dim in self._dim_set:
             st = self.dataset[self._ids[i]][dim]
             st = st.reshape((1, len(st)))
-            res, aic, bic = ou.ou_process(st_time, st)
+            res, aic, bic = ou.ou_process(st_time, st, optimizer=self._optimizer)
             coeffs_i = np.hstack((coeffs_i, res))
 
-            pred = ou.predict(st[0][0], np.arange(0, len(st[0]), 1), res[0], res[1], res[2])
-            mse = mean_squared_error(st[0], pred)
-            rmse = sqrt(mse)
-
-            # measure_list = measure_list + [res.aic, res.bic, res.mse, res.mae, res.sse, res.hqic]
-            measure_list = measure_list + [mse, rmse, aic, bic]
+            measure_list = measure_list + [aic, bic]
 
         measure_pd[self._ids[i]] = measure_list
         coeffs[self._ids[i]] = coeffs_i
+        t1 = time.time() - t0
+        process_time[self._ids[i]] = {}
+        process_time[self._ids[i]]['time'] = t1
+        process_time[self._ids[i]]['lenght'] = self.dataset[self._ids[i]][self._dim_set[0]].shape[0]
 
-    def _var_func(self, i, measure_pd, coeffs):
+    def _var_func(self, i, measure_pd, coeffs, process_time):
         """
         It computes VAR model for one trajectory.
         """
+        t0 = time.time()
+        coeffs_i = np.array([self._ids[i]])
         measure_list = [self.dataset[self._ids[i]]['mmsi'][0]]
         if self.verbose:
             print(f"Computing {i} of {len(self._ids)}")
@@ -413,25 +430,28 @@ class Models1:
         df = pd.DataFrame(st)
         model_var = VAR(df)
         res = model_var.fit(self.ar_prm, trend=self._trend)
-        coeffs_i = res.params
-        coeffs_i = coeffs_i.T.values.ravel()
+        params = res.params.T.values.ravel()
+        coeffs_i = np.hstack((coeffs_i, params))
 
-        pred = res.forecast(df.values[0:self.ar_prm], steps=df.shape[0])
-        pred = pd.DataFrame(pred)
-        for dim in range(pred.shape[1]):
-            mse = mean_squared_error(df.iloc[:,dim], pred.iloc[:,dim])
-            rmse = sqrt(mse)
-            # measure_list = measure_list + [res.aic, res.bic, res.hqic]
-            measure_list = measure_list + [mse, rmse]
-        measure_list = measure_list + [res.aic, res.bic]
+        try:
+            measure_list = measure_list + [res.aic, res.bic]
+        except:
+            measure_list = measure_list + [np.inf, np.inf]
 
         measure_pd[self._ids[i]] = measure_list
         coeffs[self._ids[i]] = coeffs_i
+        t1 = time.time() - t0
+        process_time[self._ids[i]] = {}
+        process_time[self._ids[i]]['time'] = t1
+        process_time[self._ids[i]]['lenght'] = self.dataset[self._ids[i]][self._dim_set[0]].shape[0]
 
-    def _varmax_func(self, i, measure_pd, coeffs):
+    def _varmax_func(self, i, measure_pd, coeffs, process_time):
         """
         It computes VARMA model for one trajectory.
         """
+        t0 = time.time()
+        coeffs_i = np.array([self._ids[i]])
+        no_p=False
         measure_list = [self.dataset[self._ids[i]]['mmsi'][0]]
         if self.verbose:
             print(f"Computing {i} of {len(self._ids)}")
@@ -443,27 +463,35 @@ class Models1:
             model_var = VARMAX(df, order=(self.ar_prm, self.ma_prm), trend=self._trend)
             res = model_var.fit(disp=False)
         except:
+            print(f'First failure {i}')
             try:
                 model_var = VARMAX(df, order=(self.ar_prm, self.ma_prm), trend=self._trend, error_cov_type='diagonal')
                 res = model_var.fit(disp=False)
             except:
-                model_var = VARMAX(df, order=(self.ar_prm, self.ma_prm), trend=self._trend, enforce_stationarity=False)
-                res = model_var.fit(disp=False)
+                try:
+                    print(f'Second failure {i}')
+                    model_var = VARMAX(df, order=(self.ar_prm, self.ma_prm), trend=self._trend, enforce_stationarity=False,
+                                       enforce_invertibility=False)
+                    res = model_var.fit(disp=False)
+                except:
+                    print(f'Full failure {i}')
+                    no_p=True
 
-        coeffs_i = pd.DataFrame.from_dict(res.params).T.values.ravel()
-
-        pred = res.forecast(df.shape[0])
-        pred = pd.DataFrame(pred)
-        pred = pred.fillna(method='ffill')
-        for dim in range(pred.shape[1]):
-            mse = mean_squared_error(df.iloc[:,dim], pred.iloc[:,dim])
-            rmse = sqrt(mse)
-            # measure_list = measure_list + [res.aic, res.bic, res.hqic]
-            measure_list = measure_list + [mse, rmse]
-        measure_list = measure_list + [res.aic, res.bic]
+        # coeffs_i = pd.DataFrame.from_dict(res.params).T.values.ravel()
+        if no_p:
+            coeffs_i=0
+            measure_list=0
+        else:
+            params = res.params.T.values.ravel()
+            coeffs_i = np.hstack((coeffs_i, params))
+            measure_list = measure_list + [res.aic, res.bic]
 
         measure_pd[self._ids[i]] = measure_list
         coeffs[self._ids[i]] = coeffs_i
+        t1 = time.time() - t0
+        process_time[self._ids[i]] = {}
+        process_time[self._ids[i]]['time'] = t1
+        process_time[self._ids[i]]['lenght'] = self.dataset[self._ids[i]][self._dim_set[0]].shape[0]
 
     def create_data_dict(self):
         """
