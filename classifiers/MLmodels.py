@@ -5,114 +5,93 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import f1_score, classification_report, accuracy_score
 from sklearn.preprocessing import StandardScaler
 
 
-def my_rf(x_train, x_test, y_train, y_test, n_trees=100, criterion='gini', max_depth=7):
+def my_rf(x_train, x_test, y_train, y_test, n_trees=100, criterion='gini', max_depth=7, metric='accuracy'):
     model = RandomForestClassifier(n_estimators=n_trees, criterion=criterion, max_depth=max_depth)
+    scores = cross_val_score(model, x_train, y_train, cv=10, scoring='accuracy')
     model.fit(x_train, y_train)
     y_pred = model.predict(x_test)
-    f1_test = f1_score(y_pred, y_test, average='macro')
-    summary = classification_report(y_test, y_pred)
-    acc_test = accuracy_score(y_pred, y_test)
-    y_pred = model.predict(x_train)
-    acc_train = accuracy_score(y_pred, y_train)
-    f1_train = f1_score(y_pred, y_train, average='macro')
-    print(f'RF: {acc_train} - {acc_test}')
-    print(f'RF: {f1_train} - {f1_test}')
-    return summary
+    if metric=='accuracy':
+        test_score = accuracy_score(y_pred, y_test)
+    else:
+        test_score = f1_score(y_pred, y_test, average='macro')
+    return scores.mean(), scores.std(), test_score
 
 
-def my_xgb(x_train, x_test, y_train, y_test, n_trees=100, lr=0.1, max_depth=7):
+def my_xgb(x_train, x_test, y_train, y_test, n_trees=100, lr=0.1, max_depth=7, metric='accuracy'):
     model = GradientBoostingClassifier(n_estimators=n_trees, learning_rate=lr, max_depth=max_depth)
+    scores = cross_val_score(model, x_train, y_train, cv=10, scoring='accuracy')
     model.fit(x_train, y_train)
     y_pred = model.predict(x_test)
-    f1_test = f1_score(y_pred, y_test, average='macro')
-    summary = classification_report(y_test, y_pred)
-    acc_test = accuracy_score(y_pred, y_test)
-    y_pred = model.predict(x_train)
-    acc_train = accuracy_score(y_pred, y_train)
-    f1_train = f1_score(y_pred, y_train, average='macro')
-    print(f'XGB: {acc_train} - {acc_test}')
-    print(f'XGB: {f1_train} - {f1_test}')
-    return summary
+    if metric == 'accuracy':
+        test_score = accuracy_score(y_pred, y_test)
+    else:
+        test_score = f1_score(y_pred, y_test, average='macro')
+    return scores.mean(), scores.std(), test_score
 
 
-def my_dt(x_train, x_test, y_train, y_test, criterion='gini', max_depth=10):
+def my_dt(x_train, x_test, y_train, y_test, criterion='gini', max_depth=10, metric='accuracy'):
     model = DecisionTreeClassifier(criterion=criterion, max_depth=max_depth)
+    scores = cross_val_score(model, x_train, y_train, cv=10, scoring='accuracy')
     model.fit(x_train, y_train)
     y_pred = model.predict(x_test)
-    f1_test = f1_score(y_pred, y_test, average='macro')
-    summary = classification_report(y_test, y_pred)
-    acc_test = accuracy_score(y_pred, y_test)
-    y_pred = model.predict(x_train)
-    acc_train = accuracy_score(y_pred, y_train)
-    f1_train = f1_score(y_pred, y_train, average='macro')
-    print(f'DT: {acc_train} - {acc_test}')
-    print(f'DT: {f1_train} - {f1_test}')
-    return summary
+    if metric == 'accuracy':
+        test_score = accuracy_score(y_pred, y_test)
+    else:
+        test_score = f1_score(y_pred, y_test, average='macro')
+    return scores.mean(), scores.std(), test_score
 
 
-def my_svm(x_train, x_test, y_train, y_test, kernel='rbf', gamma='auto'):
+def my_svm(x_train, x_test, y_train, y_test, kernel='rbf', gamma='auto', metric='accuracy'):
     model = SVC(kernel=kernel, gamma=gamma)
+    scores = cross_val_score(model, x_train, y_train, cv=10, scoring='accuracy')
     model.fit(x_train, y_train)
     y_pred = model.predict(x_test)
-    f1_test = f1_score(y_pred, y_test, average='macro')
-    summary = classification_report(y_test, y_pred)
-    acc_test = accuracy_score(y_pred, y_test)
-    y_pred = model.predict(x_train)
-    acc_train = accuracy_score(y_pred, y_train)
-    f1_train = f1_score(y_pred, y_train, average='macro')
-    print(f'SVM: {acc_train} - {acc_test}')
-    print(f'SVM: {f1_train} - {f1_test}')
-    return summary
+    if metric == 'accuracy':
+        test_score = accuracy_score(y_pred, y_test)
+    else:
+        test_score = f1_score(y_pred, y_test, average='macro')
+    return scores.mean(), scores.std(), test_score
 
 
-def my_lg(x_train, x_test, y_train, y_test):
-    model = LogisticRegression()
+def my_lg(x_train, x_test, y_train, y_test, max_iter=500, metric='accuracy'):
+    model = LogisticRegression(max_iter=max_iter)
+    scores = cross_val_score(model, x_train, y_train, cv=10, scoring='accuracy')
     model.fit(x_train, y_train)
     y_pred = model.predict(x_test)
-    f1_test = f1_score(y_pred, y_test, average='macro')
-    summary = classification_report(y_test, y_pred)
-    acc_test = accuracy_score(y_pred, y_test)
-    y_pred = model.predict(x_train)
-    acc_train = accuracy_score(y_pred, y_train)
-    f1_train = f1_score(y_pred, y_train, average='macro')
-    print(f'LG: {acc_train} - {acc_test}')
-    print(f'LG: {f1_train} - {f1_test}')
-    return summary
+    if metric == 'accuracy':
+        test_score = accuracy_score(y_pred, y_test)
+    else:
+        test_score = f1_score(y_pred, y_test, average='macro')
+    return scores.mean(), scores.std(), test_score
 
 
-def my_knn(x_train, x_test, y_train, y_test, n_neighbors=5):
+def my_knn(x_train, x_test, y_train, y_test, n_neighbors=5, metric='accuracy'):
     model = KNeighborsClassifier(n_neighbors=n_neighbors)
+    scores = cross_val_score(model, x_train, y_train, cv=10, scoring='accuracy')
     model.fit(x_train, y_train)
     y_pred = model.predict(x_test)
-    f1_test = f1_score(y_pred, y_test, average='macro')
-    summary = classification_report(y_test, y_pred)
-    acc_test = accuracy_score(y_pred, y_test)
-    y_pred = model.predict(x_train)
-    acc_train = accuracy_score(y_pred, y_train)
-    f1_train = f1_score(y_pred, y_train, average='macro')
-    print(f'KNN: {acc_train} - {acc_test}')
-    print(f'KNN: {f1_train} - {f1_test}')
-    return summary
+    if metric == 'accuracy':
+        test_score = accuracy_score(y_pred, y_test)
+    else:
+        test_score = f1_score(y_pred, y_test, average='macro')
+    return scores.mean(), scores.std(), test_score
 
 
-def my_mlp(x_train, x_test, y_train, y_test, hidden_layer_sizes=(50,100,200,50,), max_iter=300):
+def my_mlp(x_train, x_test, y_train, y_test, hidden_layer_sizes=(50,100,200,50,), max_iter=500, metric='accuracy'):
     model = MLPClassifier(hidden_layer_sizes=hidden_layer_sizes, max_iter=max_iter)
+    scores = cross_val_score(model, x_train, y_train, cv=10, scoring='accuracy')
     model.fit(x_train, y_train)
     y_pred = model.predict(x_test)
-    f1_test = f1_score(y_pred, y_test, average='macro')
-    summary = classification_report(y_test, y_pred)
-    acc_test = accuracy_score(y_pred, y_test)
-    y_pred = model.predict(x_train)
-    acc_train = accuracy_score(y_pred, y_train)
-    f1_train = f1_score(y_pred, y_train, average='macro')
-    print(f'MLP: {acc_train} - {acc_test}')
-    print(f'MLP: {f1_train} - {f1_test}')
-    return summary
+    if metric == 'accuracy':
+        test_score = accuracy_score(y_pred, y_test)
+    else:
+        test_score = f1_score(y_pred, y_test, average='macro')
+    return scores.mean(), scores.std(), test_score
 
 
 def stratify_dataset(x):
@@ -141,18 +120,21 @@ def apply_ML(data_path):
     # x_test = scaler.transform(x_test)
 
     #models
-    summary_rf = my_rf(x_train, x_test, y_train, y_test)
-    # print(summary_rf)
-    summary_xgb = my_xgb(x_train, x_test, y_train, y_test)
-    # print(summary_xgb)
-    summary_svm = my_svm(x_train, x_test, y_train, y_test)
-    # print(summary_svm)
-    summary_dt = my_dt(x_train, x_test, y_train, y_test)
-    # print(summary_dt)
-    summary_lg = my_lg(x_train, x_test, y_train, y_test)
-    # print(summary_lg)
-    summary_knn = my_knn(x_train, x_test, y_train, y_test)
-    # print(summary_knn)
-    summary_mlp = my_mlp(x_train, x_test, y_train, y_test)
-    # print(summary_mlp)
+    rf_mean, rf_std, rf_test = my_rf(x_train, x_test, y_train, y_test)
+    xgb_mean, xgb_std, xgb_test = my_xgb(x_train, x_test, y_train, y_test)
+    svm_mean, svm_std, svm_test = my_svm(x_train, x_test, y_train, y_test)
+    dt_mean, dt_std, dt_test = my_dt(x_train, x_test, y_train, y_test)
+    lg_mean, lg_std, lg_test = my_lg(x_train, x_test, y_train, y_test)
+    knn_mean, knn_std, knn_test = my_knn(x_train, x_test, y_train, y_test)
+    mlp_mean, mlp_std, mlp_test = my_mlp(x_train, x_test, y_train, y_test)
+
+    #print
+    print(data_path)
+    print(f'Random Forest & {rf_mean} & {rf_std} & {rf_test}')
+    print(f'XGBoost & {xgb_mean} & {xgb_std} & {xgb_test}')
+    print(f'Decision Tree & {dt_mean} & {dt_std} & {dt_test}')
+    print(f'Logistic Regression & {lg_mean} & {lg_std} & {lg_test}')
+    print(f'SVM & {svm_mean} & {svm_std} & {svm_test}')
+    print(f'KNN & {knn_mean} & {knn_std} & {knn_test}')
+    print(f'MLP & {mlp_mean} & {mlp_std} & {mlp_test}')
 

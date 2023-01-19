@@ -9,13 +9,14 @@ from sklearn.feature_selection import mutual_info_regression as mi_reg
 from sklearn.metrics import normalized_mutual_info_score as nmi
 
 
-def create_dataset(data, folder='./images/'):
+def create_dataset(data, folder='./images/', verbose=False):
 
     if not os.path.exists(folder):
         os.makedirs(folder)
 
     for c in data[37].keys():
-        print(c)
+        if verbose:
+            print(c)
         dataset = pd.DataFrame()
         for type_v in data.keys():
             if c in data[type_v].keys():

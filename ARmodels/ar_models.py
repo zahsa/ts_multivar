@@ -94,7 +94,7 @@ class Models1:
         self.coeffs = None
         self.measures = None
         self.processing_time = None
-        self.num_cores = 1
+        self.num_cores = 8
         if 'njobs' in args.keys():
             self.num_cores = args['njobs']
 

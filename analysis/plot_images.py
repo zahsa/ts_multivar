@@ -173,12 +173,14 @@ def info_to_plot(data, model=None, measure='AIC', folder='./images/'):
         plot_time(info_data_time, model=model, folder=folder)
 
 
-def plot_all(data, folder='./images/'):
+def plot_all(data, folder='./images/', verbose=False):
     info_data = {}
     info_data_time = {}
 
     for c in data[37].keys():
-        print(c)
+    # for c in ['ou-L-BFGS-B', 'ou-SLSQP', 'arima_1_0_n']:
+        if verbose:
+            print(c)
         config = pd.DataFrame()
         config_time = pd.DataFrame()
         for type_v in data.keys():
@@ -193,10 +195,24 @@ def plot_all(data, folder='./images/'):
         info_data[c] = config['AIC']
         info_data_time[c] = config_time['time']/config_time['lenght']
 
-    config = pd.DataFrame.from_dict(info_data)
+    #reset index
+    info_data_d = {}
+    for k, v in info_data.items():
+        aux = pd.Series(v)
+        aux = aux.reset_index(drop=True)
+        info_data_d[k] = aux
+
+    info_data_time_d = {}
+    for k, v in info_data_time.items():
+        aux = pd.Series(v)
+        aux = aux.reset_index(drop=True)
+        info_data_time_d[k] = aux
+
+    config = pd.DataFrame.from_dict(info_data_d)
+    config.fillna(config.max().max())
     config[config > 1e5] = 1e5
     config[config < -5e5] = -5e5
-    config_time = pd.DataFrame.from_dict(info_data_time)
+    config_time = pd.DataFrame.from_dict(info_data_time_d)
 
     # box plot
     fig = go.Figure()
@@ -219,3 +235,9 @@ def plot_all(data, folder='./images/'):
     fig.update_layout(width=1000, height=900, showlegend=False)
     # fig.show()
     fig.write_image(f'{folder}/time_rate_all.png', scale=1)
+
+    # if self.features_opt == 'varma':
+    #     # varma fixing text
+    #     dtest = pd.DataFrame(dataset['1'].str.replace('[', ''))
+    #     dtest = pd.DataFrame(dtest['1'].str.replace('[', ''))
+    #     df_features = pd.DataFrame(dtest['1'].str.split(expand=True))

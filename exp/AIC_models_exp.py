@@ -38,17 +38,17 @@ def AIC_experiments(dataset_dict, dim_set, main_folder, measure='AIC', tr='n'):
         curr_config[f'var_{ar_p}_{tr}'] = features.path
     pli.info_to_plot(curr_config_var, model='var', measure=measure, folder=main_folder)
 
-    print('MULTIARIMA')
-    curr_config_multiarima = {}
-    for ar_p in [1, 2, 3]:
-        for ma_p in [0, 1, 2, 3]:
-            # for tr in ['n','c']:
-            features = Models1(dataset=dataset_dict, features_opt='multi_arima', dim_set=dim_set, ar_prm=ar_p,
-                               ma_prm=ma_p, trend=tr, folder=main_folder)
-            curr_config_multiarima[f'{ar_p}_{ma_p}_{tr}'] = features.path
-            curr_config[f'multi_arima_{ar_p}_{ma_p}_{tr}'] = features.path
-
-    pli.info_to_plot(curr_config_multiarima, model='multi_arima', measure=measure, folder=main_folder)
+    # print('MULTIARIMA')
+    # curr_config_multiarima = {}
+    # for ar_p in [1, 2, 3]:
+    #     for ma_p in [0, 1, 2, 3]:
+    #         # for tr in ['n','c']:
+    #         features = Models1(dataset=dataset_dict, features_opt='multi_arima', dim_set=dim_set, ar_prm=ar_p,
+    #                            ma_prm=ma_p, trend=tr, folder=main_folder)
+    #         curr_config_multiarima[f'{ar_p}_{ma_p}_{tr}'] = features.path
+    #         curr_config[f'multi_arima_{ar_p}_{ma_p}_{tr}'] = features.path
+    #
+    # pli.info_to_plot(curr_config_multiarima, model='multi_arima', measure=measure, folder=main_folder)
 
     print('VARMAX')
     curr_config_varma = {}
@@ -65,40 +65,31 @@ def AIC_experiments(dataset_dict, dim_set, main_folder, measure='AIC', tr='n'):
     return curr_config
 
 
-def AIC_general(dataset_dict, dim_set, main_folder, tr='n'):
+def AIC_general(dataset_dict, dim_set, main_folder, tr='n', ou_opt='L-BFGS-B',
+                arima_ar_p=3, arima_ma_p=0, var_ar_p=2, varmax_ar_p=2, varmax_ma_p=0, verbose=False):
     curr_config = {}
 
-    print('OU')
-    # opt = 'SLSQP'
-    opt = 'L-BFGS-B'
-    features = Models1(dataset=dataset_dict, features_opt='ou',  optimizer=opt, dim_set=dim_set, folder=main_folder)
-    curr_config[f'ou-{opt}'] = features.path
+    if verbose:
+        print('OU')
+    features = Models1(dataset=dataset_dict, features_opt='ou',  optimizer=ou_opt, dim_set=dim_set, folder=main_folder)
+    curr_config[f'ou-{ou_opt}'] = features.path
 
-    print('ARIMA')
-    ar_p = 3
-    ma_p = 0
-    features = Models1(dataset=dataset_dict, features_opt='arima', dim_set=dim_set, ar_prm=ar_p, ma_prm=ma_p,
+    if verbose:
+        print('ARIMA')
+    features = Models1(dataset=dataset_dict, features_opt='arima', dim_set=dim_set, ar_prm=arima_ar_p, ma_prm=arima_ma_p,
                        trend=tr, folder=main_folder)
-    curr_config[f'arima_{ar_p}_{ma_p}_{tr}'] = features.path
+    curr_config[f'arima_{arima_ar_p}_{arima_ma_p}_{tr}'] = features.path
 
-    print('VAR')
-    ar_p = 2
-    features = Models1(dataset=dataset_dict, features_opt='var', dim_set=dim_set, ar_prm=ar_p, ma_prm=0, trend=tr,
+    if verbose:
+        print('VAR')
+    features = Models1(dataset=dataset_dict, features_opt='var', dim_set=dim_set, ar_prm=var_ar_p, ma_prm=0, trend=tr,
                        folder=main_folder)
-    curr_config[f'var_{ar_p}_{tr}'] = features.path
+    curr_config[f'var_{var_ar_p}_{tr}'] = features.path
 
-    # print('MULTIARIMA')
-    # ar_p = 3
-    # ma_p = 0
-    # features = Models1(dataset=dataset_dict, features_opt='multi_arima', dim_set=dim_set, ar_prm=ar_p,
-    #                    ma_prm=ma_p, trend=tr, folder=main_folder)
-    # curr_config[f'multi_arima_{ar_p}_{ma_p}_{tr}'] = features.path
-
-    # print('VARMAX')
-    # ar_p = 2
-    # ma_p = 0
-    # features = Models1(dataset=dataset_dict, features_opt='varmax', dim_set=dim_set, ar_prm=ar_p, ma_prm=ma_p,
+    # if verbose:
+    #   print('VARMAX')
+    # features = Models1(dataset=dataset_dict, features_opt='varmax', dim_set=dim_set, ar_prm=varmax_ar_p, ma_prm=varmax_ma_p,
     #                    trend=tr, folder=main_folder)
-    # curr_config[f'varma_{ar_p}_{ma_p}_{tr}'] = features.path
+    # curr_config[f'varma_{varmax_ar_p}_{varmax_ma_p}_{tr}'] = features.path
 
     return curr_config
