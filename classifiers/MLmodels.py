@@ -105,13 +105,17 @@ def stratify_dataset(x):
     return new_data
 
 
-def apply_ML(data_path):
+def apply_ML_vt(data_path, label=False):
     dataset = pd.read_csv(f'{data_path}/dataset.csv', index_col=0)
     # balacing dataset
     dataset = stratify_dataset(dataset)
+    dataset = dataset.sample(frac=1).reset_index(drop=True)
 
-    features = dataset.iloc[:, 1:-1]
+    dataset.drop(['mmsi'], axis=1, inplace=True)
+    features = dataset.iloc[:, 0:-2]
     labels = dataset['vessel_type']
+    if label:
+        labels = dataset['label']
     x_train, x_test, y_train, y_test = train_test_split(features, labels, test_size=0.2, stratify=labels)
 
     #normalization
@@ -130,11 +134,48 @@ def apply_ML(data_path):
 
     #print
     print(data_path)
-    print(f'Random Forest & {rf_mean} & {rf_std} & {rf_test}')
-    print(f'XGBoost & {xgb_mean} & {xgb_std} & {xgb_test}')
-    print(f'Decision Tree & {dt_mean} & {dt_std} & {dt_test}')
-    print(f'Logistic Regression & {lg_mean} & {lg_std} & {lg_test}')
-    print(f'SVM & {svm_mean} & {svm_std} & {svm_test}')
-    print(f'KNN & {knn_mean} & {knn_std} & {knn_test}')
-    print(f'MLP & {mlp_mean} & {mlp_std} & {mlp_test}')
+    print(f'& Random Forest & {round(rf_mean,2)} & {round(rf_std,2)} & {round(rf_test,2)}')
+    print(f'& XGBoost & {round(xgb_mean,2)} & {round(xgb_std,2)} & {round(xgb_test,2)}')
+    print(f'& Decision Tree & {round(dt_mean,2)} & {round(dt_std,2)} & {round(dt_test,2)}')
+    print(f'& Logistic Regression & {round(lg_mean,2)} & {round(lg_std,2)} & {round(lg_test,2)}')
+    print(f'& SVM & {round(svm_mean,2)} & {round(svm_std,2)} & {round(svm_test,2)}')
+    print(f'& KNN & {round(knn_mean,2)} & {round(knn_std,2)} & {round(knn_test,2)}')
+    print(f'& MLP & {round(mlp_mean,2)} & {round(mlp_std,2)} & {round(mlp_test,2)}')
+
+
+def apply_ML_np(data_path, port=False):
+    dataset = pd.read_csv(f'{data_path}/dataset.csv', index_col=0)
+    # balacing dataset
+    dataset = stratify_dataset(dataset)
+
+    dataset.drop(['mmsi', 'vessel_type'], axis=1, inplace=True)
+    features = dataset.iloc[:, 0:-2]
+    labels = dataset['labels2']
+    if port:
+        labels = dataset['label']
+    x_train, x_test, y_train, y_test = train_test_split(features, labels, test_size=0.2, stratify=labels)
+
+    #normalization
+    # scaler = StandardScaler()
+    # x_train = scaler.fit_transform(x_train)
+    # x_test = scaler.transform(x_test)
+
+    #models
+    rf_mean, rf_std, rf_test = my_rf(x_train, x_test, y_train, y_test)
+    xgb_mean, xgb_std, xgb_test = my_xgb(x_train, x_test, y_train, y_test)
+    svm_mean, svm_std, svm_test = my_svm(x_train, x_test, y_train, y_test)
+    dt_mean, dt_std, dt_test = my_dt(x_train, x_test, y_train, y_test)
+    lg_mean, lg_std, lg_test = my_lg(x_train, x_test, y_train, y_test)
+    knn_mean, knn_std, knn_test = my_knn(x_train, x_test, y_train, y_test)
+    mlp_mean, mlp_std, mlp_test = my_mlp(x_train, x_test, y_train, y_test)
+
+    #print
+    print(data_path)
+    print(f'& Random Forest & {round(rf_mean,2)} & {round(rf_std,2)} & {round(rf_test,2)}')
+    print(f'& XGBoost & {round(xgb_mean,2)} & {round(xgb_std,2)} & {round(xgb_test,2)}')
+    print(f'& Decision Tree & {round(dt_mean,2)} & {round(dt_std,2)} & {round(dt_test,2)}')
+    print(f'& Logistic Regression & {round(lg_mean,2)} & {round(lg_std,2)} & {round(lg_test,2)}')
+    print(f'& SVM & {round(svm_mean,2)} & {round(svm_std,2)} & {round(svm_test,2)}')
+    print(f'& KNN & {round(knn_mean,2)} & {round(knn_std,2)} & {round(knn_test,2)}')
+    print(f'& MLP & {round(mlp_mean,2)} & {round(mlp_std,2)} & {round(mlp_test,2)}')
 

@@ -339,7 +339,7 @@ class Models1:
         It computes ARIMA model for one trajectory.
         """
         t0 = time.time()
-        coeffs_i = np.array([self._ids[i]])
+        coeffs_i = np.array([self.dataset[self._ids[i]]['mmsi'][0]])
         measure_list = [self.dataset[self._ids[i]]['mmsi'][0]]
         if self.verbose:
             print(f"Computing {i} of {len(self._ids)}")
@@ -364,14 +364,15 @@ class Models1:
         It computes multi ARIMA model for one trajectory.
         """
         t0 = time.time()
-        coeffs_i = np.array([self._ids[i]])
+        coeffs_i = np.array([self.dataset[self._ids[i]]['mmsi'][0]])
+        measure_list = [self.dataset[self._ids[i]]['mmsi'][0]]
         if self.verbose:
             print(f"Computing {i} of {len(self._ids)}")
         st = {}
         for dim in self._dim_set:
             st[dim] = self.dataset[self._ids[i]][dim]
         df = pd.DataFrame(st)
-        measure_list = [self.dataset[self._ids[i]]['mmsi'][0]]
+
 
         for dim in self._dim_set:
             model = sm.tsa.SARIMAX(df.loc[:, dim], exog=df.loc[:, df.columns != dim], order=(self.ar_prm, self.i_prm, self.ma_prm),
@@ -393,12 +394,13 @@ class Models1:
         It computes OU model for one trajectory.
         """
         t0 = time.time()
-        coeffs_i = np.array([self._ids[i]])
+        coeffs_i = np.array([self.dataset[self._ids[i]]['mmsi'][0]])
+        measure_list = [self.dataset[self._ids[i]]['mmsi'][0]]
         if self.verbose:
             print(f"Computing {i} of {len(self._ids)}")
         st_time = self.dataset[self._ids[i]]['time'].astype('datetime64[s]')
         st_time = np.hstack((0, np.diff(st_time).cumsum().astype('float')))
-        measure_list = [self.dataset[self._ids[i]]['mmsi'][0]]
+
 
         for dim in self._dim_set:
             st = self.dataset[self._ids[i]][dim]
@@ -420,7 +422,7 @@ class Models1:
         It computes VAR model for one trajectory.
         """
         t0 = time.time()
-        coeffs_i = np.array([self._ids[i]])
+        coeffs_i = np.array([self.dataset[self._ids[i]]['mmsi'][0]])
         measure_list = [self.dataset[self._ids[i]]['mmsi'][0]]
         if self.verbose:
             print(f"Computing {i} of {len(self._ids)}")
@@ -450,9 +452,9 @@ class Models1:
         It computes VARMA model for one trajectory.
         """
         t0 = time.time()
-        coeffs_i = np.array([self._ids[i]])
-        no_p=False
+        coeffs_i = np.array([self.dataset[self._ids[i]]['mmsi'][0]])
         measure_list = [self.dataset[self._ids[i]]['mmsi'][0]]
+        no_p = False
         if self.verbose:
             print(f"Computing {i} of {len(self._ids)}")
         st = {}

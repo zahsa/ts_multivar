@@ -1,3 +1,5 @@
+import pandas as pd
+
 from preprocessing import read_data as rd
 from exp import AIC_models_exp as aicExp
 import os
@@ -10,6 +12,7 @@ vessel_list = [37, 60, 30, 80]
 dim_set = ['lat', 'lon']
 all_paths = {}
 
+print('Whole trajectory')
 for vessel_type in vessel_list:
     print(vessel_type)
     # 2020 - region_[47.5, 49.3, -125.5, -122.5]
@@ -28,7 +31,7 @@ pli.plot_all(all_paths, folder=f'./results/all/')
 ppdt.create_dataset(all_paths, folder='./data/coeffs/')
 ppdt.plot_images('./data/coeffs/')
 
-# navigating
+print('Navigating')
 for vessel_type in vessel_list:
     print(vessel_type)
     # 2020 - region_[47.5, 49.3, -125.5, -122.5]
@@ -48,7 +51,7 @@ pli.plot_all(all_paths, folder=f'./results/all/navigating/')
 ppdt.create_dataset(all_paths, folder='./data/navigating/coeffs/')
 ppdt.plot_images('./data/navigating/coeffs/')
 
-# port
+print('Port')
 for vessel_type in vessel_list:
     print(vessel_type)
     # 2020 - region_[47.5, 49.3, -125.5, -122.5]
@@ -67,3 +70,17 @@ for vessel_type in vessel_list:
 pli.plot_all(all_paths, folder=f'./results/all/port/')
 ppdt.create_dataset(all_paths, folder='./data/port/coeffs/')
 ppdt.plot_images('./data/port/coeffs/')
+
+# combining port and navigating datasets for second classification
+print('Combining port and navigating')
+folders_name = os.listdir("./data/port/coeffs/")
+for filename in folders_name:
+    data_n = pd.read_csv(f'./data/navigating/coeffs/{filename}/dataset.csv', index_col=0)
+    data_n['labels2'] = 'navigating'
+    data_p = pd.read_csv(f'./data/port/coeffs/{filename}/dataset.csv', index_col=0)
+    data_p['labels2'] = 'port'
+    join_data = pd.concat([data_n, data_p])
+    if not os.path.exists(f'./data/join/coeffs/{filename}/'):
+        os.makedirs(f'./data/join/coeffs/{filename}/')
+    join_data.to_csv(f'./data/join/coeffs/{filename}/dataset.csv')
+    print('\n')
