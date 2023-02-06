@@ -7,35 +7,36 @@ def AIC_experiments(dataset_dict, dim_set, main_folder, measure='AIC', tr='n'):
 
     print('OU')
     curr_config_ou = {}
-    optimizers = ['L-BFGS-B', 'SLSQP']#, 'BFGS', 'Newton-CG', 'CG']
+    # optimizers = ['L-BFGS-B', 'SLSQP', 'BFGS', 'Newton-CG', 'CG']
+    optimizers = ['SLSQP']
     for opt in optimizers:
         try:
             features = Models1(dataset=dataset_dict, features_opt='ou', optimizer=opt, dim_set=dim_set, folder=main_folder)
             curr_config_ou[f'{opt}'] = features.path
-            curr_config[f'ou-{opt}'] = features.path
+            curr_config[f'OU'] = features.path
         except:
             print(f'ou did not run for {opt}')
     pli.info_to_plot(curr_config_ou, model='ou', measure=measure, folder=main_folder)
 
     print('ARIMA')
     curr_config_arima = {}
-    for ar_p in [1, 2, 3]:
+    for ar_p in [1, 2, 3, 4]:
         for ma_p in [0, 1, 2, 3]:
             # for tr in ['c', 'n']:
             features = Models1(dataset=dataset_dict, features_opt='arima', dim_set=dim_set, ar_prm=ar_p, ma_prm=ma_p,
                                trend=tr, folder=main_folder)
-            curr_config_arima[f'{ar_p}_{ma_p}_{tr}'] = features.path
-            curr_config[f'arima_{ar_p}_{ma_p}_{tr}'] = features.path
+            curr_config_arima[f'{ar_p}_{ma_p}'] = features.path
+            curr_config[f'ARMA({ar_p},{ma_p})'] = features.path
     pli.info_to_plot(curr_config_arima, model='arima', measure=measure, folder=main_folder)
 
     print('VAR')
     curr_config_var = {}
-    for ar_p in [1, 2, 3]:
+    for ar_p in [1, 2, 3, 4]:
         # for tr in ['n', 'c']:
         features = Models1(dataset=dataset_dict, features_opt='var', dim_set=dim_set, ar_prm=ar_p, ma_prm=0, trend=tr,
                            folder=main_folder)
         curr_config_var[f'{ar_p}_{tr}'] = features.path
-        curr_config[f'var_{ar_p}_{tr}'] = features.path
+        curr_config[f'VAR({ar_p}) CML'] = features.path
     pli.info_to_plot(curr_config_var, model='var', measure=measure, folder=main_folder)
 
     # print('MULTIARIMA')
@@ -52,13 +53,14 @@ def AIC_experiments(dataset_dict, dim_set, main_folder, measure='AIC', tr='n'):
 
     print('VARMAX')
     curr_config_varma = {}
-    for ar_p in [1, 2, 3]:
-        for ma_p in [0, 1, 2, 3]:
-            # for tr in ['n', 'c']:
-            features = Models1(dataset=dataset_dict, features_opt='varmax', dim_set=dim_set, ar_prm=ar_p, ma_prm=ma_p,
-                               trend=tr, folder=main_folder)
-            curr_config_varma[f'{ar_p}_{ma_p}_{tr}'] = features.path
-            curr_config[f'varma_{ar_p}_{ma_p}_{tr}'] = features.path
+    for ar_p in [1, 2, 3, 4]:
+        # for ma_p in [0, 1, 2, 3]:
+        # for tr in ['n', 'c']:
+        ma_p = 0
+        features = Models1(dataset=dataset_dict, features_opt='varmax', dim_set=dim_set, ar_prm=ar_p, ma_prm=ma_p,
+                           trend=tr, folder=main_folder)
+        curr_config_varma[f'{ar_p}_{ma_p}_{tr}'] = features.path
+        curr_config[f'VAR({ar_p}) EML'] = features.path
     pli.info_to_plot(curr_config_varma, model='varmax', measure=measure, folder=main_folder)
 
     pli.info_to_plot(curr_config, measure=measure, folder=main_folder)

@@ -12,7 +12,7 @@ all_paths = {}
 
 for vessel_type in vessel_list:
     print(vessel_type)
-    # 2021 - region_[47.5, 49.3, -125.5, -122.5]
+    # 2020 - region_[47.5, 49.3, -125.5, -122.5]
     data_path = f'./data/DCAIS_[{vessel_type}]_region_[47.5, 49.3, -125.5, -122.5]_01-03_to_30-05_trips.csv'
     file_name = os.path.basename(data_path)
     file_name = os.path.splitext(file_name)[0]

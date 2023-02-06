@@ -6,7 +6,7 @@ import os
 import classifiers.preparing_data as ppdt
 from analysis import plot_images as pli
 
-# Fishing type
+# Pleasure Craft, Passenger, Fishing, Tanker
 vessel_list = [37, 60, 30, 80]
 # Attributes
 dim_set = ['lat', 'lon']
@@ -25,7 +25,8 @@ for vessel_type in vessel_list:
     if not os.path.exists(main_folder):
         os.makedirs(main_folder)
 
-    all_paths[vessel_type] = aicExp.AIC_general(dataset_dict, dim_set, main_folder)
+    all_paths[vessel_type] = aicExp.AIC_general(dataset_dict, dim_set, main_folder, ou_opt='SLSQP',
+                arima_ar_p=3, arima_ma_p=0, var_ar_p=3, varmax_ar_p=3, varmax_ma_p=0)
 
 pli.plot_all(all_paths, folder=f'./results/all/')
 ppdt.create_dataset(all_paths, folder='./data/coeffs/')
@@ -45,7 +46,7 @@ for vessel_type in vessel_list:
         os.makedirs(main_folder)
 
     all_paths[vessel_type] = aicExp.AIC_general(dataset_dict, dim_set, main_folder, ou_opt='SLSQP',
-                arima_ar_p=3, arima_ma_p=0, var_ar_p=3, varmax_ar_p=2, varmax_ma_p=0)
+                arima_ar_p=3, arima_ma_p=0, var_ar_p=3, varmax_ar_p=3, varmax_ma_p=0)
 
 pli.plot_all(all_paths, folder=f'./results/all/navigating/')
 ppdt.create_dataset(all_paths, folder='./data/navigating/coeffs/')
@@ -65,7 +66,7 @@ for vessel_type in vessel_list:
         os.makedirs(main_folder)
 
     all_paths[vessel_type] = aicExp.AIC_general(dataset_dict, dim_set, main_folder, ou_opt='SLSQP',
-                arima_ar_p=3, arima_ma_p=0, var_ar_p=3, varmax_ar_p=2, varmax_ma_p=0)
+                arima_ar_p=3, arima_ma_p=0, var_ar_p=3, varmax_ar_p=3, varmax_ma_p=0)
 
 pli.plot_all(all_paths, folder=f'./results/all/port/')
 ppdt.create_dataset(all_paths, folder='./data/port/coeffs/')
@@ -84,3 +85,29 @@ for filename in folders_name:
         os.makedirs(f'./data/join/coeffs/{filename}/')
     join_data.to_csv(f'./data/join/coeffs/{filename}/dataset.csv')
     print('\n')
+
+
+# combining port and navigating datasets for second classification
+print('Combining port and navigating for vessel type')
+folders_name = os.listdir("./data/port/coeffs/")
+for filename in folders_name:
+    data_n = pd.read_csv(f'./data/navigating/coeffs/{filename}/dataset.csv', index_col=0)
+    data_p = pd.read_csv(f'./data/port/coeffs/{filename}/dataset.csv', index_col=0)
+    data_p = data_p.drop(['vessel_type', 'label'], axis=1)
+    join_data = pd.merge(data_n, data_p, on='mmsi')
+    if not os.path.exists(f'./data/join_2/coeffs/{filename}/'):
+        os.makedirs(f'./data/join_2/coeffs/{filename}/')
+    join_data.to_csv(f'./data/join_2/coeffs/{filename}/dataset.csv')
+    print('\n')
+
+
+# combining var port and ou navigating datasets for second classification
+print('Combining port and navigating for vessel type')
+data_n = pd.read_csv(f'./data/navigating/coeffs/ou-SLSQP/dataset.csv', index_col=0)
+data_p = pd.read_csv(f'./data/port/coeffs/var_3_n/dataset.csv', index_col=0)
+data_p = data_p.drop(['vessel_type', 'label'], axis=1)
+join_data = pd.merge(data_n, data_p, on='mmsi')
+if not os.path.exists(f'./data/join_3/coeffs/ou-var/'):
+    os.makedirs(f'./data/join_3/coeffs/ou-var/')
+join_data.to_csv(f'./data/join_3/coeffs/ou-var/dataset.csv')
+print('\n')

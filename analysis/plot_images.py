@@ -82,17 +82,17 @@ def boxplot_all(data, measure='AIC', folder='./images/'):
         if f'{measure}.1' in data[i].keys():
             data[i][f'{measure}.1'] = data[i][f'{measure}.1'][data[i][f'{measure}.1'] < 1e4]
             x = pd.concat([x, (data[i][measure] + data[i][f'{measure}.1']) / 2], axis=1)
-            if 'ou' in i:
+            if 'OU' in i:
                 col[i] = 'orange'
             elif 'multi_arima' in i:
                 col[i] = 'blue'
-            elif 'arima' in i:
+            elif 'ARMA' in i:
                 col[i] = 'green'
         else:
             x = pd.concat([x, data[i][measure]], axis=1)
-            if 'varma' in i:
+            if 'EML' in i:
                 col[i] = 'black'
-            elif 'var' in i:
+            elif 'CML' in i:
                 col[i] = 'red'
 
     x.columns = data.keys()
@@ -118,10 +118,9 @@ def boxplot_all(data, measure='AIC', folder='./images/'):
     # BAR CHART MEDIAN
     fig = go.Figure(go.Bar(name='median', y=table.index, x=table['median'], text=round(table['median'], 2)))
     # Change the bar mode
-    fig.update_traces(orientation='h', textposition='inside', textfont_size=16)
-    fig.update_layout(barmode='relative', uniformtext_mode='hide')
+    fig.update_traces(orientation='h', textposition='inside', textfont_size=20)
+    fig.update_layout(width=1300, height=1000, barmode='relative', uniformtext_mode='hide', font=dict(size=20))
     # fig.show()
-    fig.update_layout(width=1300, height=1000)
     fig.write_image(f'{folder}/features_median_all.png', scale=1)
 
     # BAR CHART ALL
@@ -147,8 +146,8 @@ def plot_time(data, model='all', folder='./images/'):
         x = pd.concat([x, curr_c], axis=1)
     x.index = ['Time Rate per trajectory (s)']
     fig = px.bar(x.T, y='Time Rate per trajectory (s)', title=model, text_auto='.4f')
-    fig.update_traces(textfont_size=16, textangle=0, textposition="outside", cliponaxis=False)
-    fig.update_yaxes(tickfont=dict(size=16))
+    fig.update_traces(textfont_size=20, textangle=0, textposition="outside", cliponaxis=False)
+    fig.update_yaxes(tickfont=dict(size=20))
     fig.update_layout(width=1300, height=1000)
     # fig.show()
     fig.write_image(f'{folder}/time_rate_{model}.png', scale=3)
@@ -193,7 +192,7 @@ def plot_all(data, folder='./images/', verbose=False):
                 config_time = pd.concat([config_time, info_time.T], axis=0)
 
         info_data[c] = config['AIC']
-        info_data_time[c] = config_time['time']/config_time['lenght']
+        info_data_time[c] = config_time['time']#/config_time['lenght']
 
     #reset index
     info_data_d = {}
@@ -214,25 +213,42 @@ def plot_all(data, folder='./images/', verbose=False):
     config[config < -5e5] = -5e5
     config_time = pd.DataFrame.from_dict(info_data_time_d)
 
+    col = {}
+    for i in config.keys():
+        if 'OU' in i:
+            col[i] = 'orange'
+        elif 'multi_arima' in i:
+            col[i] = 'blue'
+        elif 'ARMA' in i:
+            col[i] = 'green'
+        else:
+            if 'EML' in i:
+                col[i] = 'black'
+            elif 'CML' in i:
+                col[i] = 'red'
+
     # box plot
     fig = go.Figure()
     for i in config.columns:
         fig.add_trace(go.Box(y=config[i],
-                             name=i))
+                             name=i,
+                             line_color=col[i]))
     fig.update_traces(showlegend=False)
-    fig.update_layout(width=1000, height=900)
-    fig.update_yaxes(tickfont=dict(size=25))
-    fig.update_xaxes(tickfont=dict(size=25))
+    fig.update_layout(width=1300, height=1000, font=dict(size=20))
+    fig.update_yaxes(tickfont=dict(size=20), title='AIC values')
+    fig.update_xaxes(tickfont=dict(size=20), title='Models Configuration')
     # fig.show()
     fig.write_image(f'{folder}/features_AIC_all.png', scale=1)
 
     # time plot
+
     x = config_time.mean()
-    fig = px.bar(x, text_auto='.6f')
-    fig.update_traces(textfont_size=25, textangle=0, textposition="outside", cliponaxis=False)
-    fig.update_yaxes(tickfont=dict(size=25), title='Time Rate per trajectory (s)')
-    fig.update_xaxes(tickfont=dict(size=25), title='Models Configuration')
-    fig.update_layout(width=1000, height=900, showlegend=False)
+    fig = px.bar(x, text_auto='.2f')
+    fig.update_yaxes(tickfont=dict(size=20), title='Average of the processing time (s)')
+    fig.update_xaxes(tickfont=dict(size=20), title='Models Configuration')
+    fig.update_layout(width=1300, height=1000, showlegend=False, uniformtext_minsize=16, font=dict(size=20))
+    fig.update_traces(textfont_size=20, textangle=90, cliponaxis=False)
+    fig['data'][0].width = 1.2
     # fig.show()
     fig.write_image(f'{folder}/time_rate_all.png', scale=1)
 

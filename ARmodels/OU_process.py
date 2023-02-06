@@ -67,6 +67,8 @@ def loglik(t, x, mean_rev_speed, mean_rev_level, vola):
 
 def mean(x0, t, mean_rev_speed, mean_rev_level):
     # print(mean_rev_speed)
+    if mean_rev_speed < 0 or np.isnan(mean_rev_speed):
+        mean_rev_speed = 0.1
     assert mean_rev_speed >= 0
     return x0 * np.exp(-mean_rev_speed * t) + (1.0 - np.exp(- mean_rev_speed * t)) * mean_rev_level
 
@@ -76,7 +78,11 @@ def std(t, mean_rev_speed, vola):
 
 
 def variance(t, mean_rev_speed, vola):
+    if mean_rev_speed < 0 or np.isnan(mean_rev_speed):
+        mean_rev_speed = 0.1
     assert mean_rev_speed >= 0
+    if vola < 0 or np.isnan(vola):
+        vola = 0.01
     assert vola >= 0
     return vola * vola * (1.0 - np.exp(- 2.0 * mean_rev_speed * t)) / (2 * mean_rev_speed)
 
