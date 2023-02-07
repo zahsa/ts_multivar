@@ -228,8 +228,9 @@ def plot_all(data, folder='./images/', verbose=False):
                 col[i] = 'red'
 
     # box plot
+    order = config.median(axis=0).sort_values()
     fig = go.Figure()
-    for i in config.columns:
+    for i in order.index:
         fig.add_trace(go.Box(y=config[i],
                              name=i,
                              line_color=col[i]))
@@ -243,6 +244,7 @@ def plot_all(data, folder='./images/', verbose=False):
     # time plot
 
     x = config_time.mean()
+    x = x.sort_values()
     fig = px.bar(x, text_auto='.2f')
     fig.update_yaxes(tickfont=dict(size=20), title='Average of the processing time (s)')
     fig.update_xaxes(tickfont=dict(size=20), title='Models Configuration')
